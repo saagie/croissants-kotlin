@@ -30,15 +30,15 @@ spring:
               connectiontimeout: 5000
               timeout: 5000
               writetimeout: 5000
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/croissants
+    username: root
+    password: root
 
 # MONGO
 #  data:
 #    mongodb:
 #      uri: mongodb://${CROISSANTS_MONGO_URI}
-  datasource:
-    url: jdbc:mysql://127.0.0.1:3306/croissants
-    username: root
-    password: root
 ##########################
 # SECURITY
 slack:
