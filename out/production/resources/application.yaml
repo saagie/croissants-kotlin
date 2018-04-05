@@ -6,20 +6,20 @@ logging:
     io.saagie: WARN
     me.ramswaroop.jbot: WARN
 ## GENERAL
-url: ${ASTON_PARKING_URL}
+url: ${CROISSANTS_URL}
 # SLACK BOT
-slackBotToken: ${ASTON_PARKING_SLACKBOT_TOKEN}
-slackWebhookUrl: ${ASTON_PARKING_SLACK_WEBHOOK_URL}
+slackBotToken: ${CROISSANTS_SLACKBOT_TOKEN}
+slackWebhookUrl: ${CROISSANTS_SLACK_WEBHOOK_URL}
 rtmUrl: "https://slack.com/api/rtm.start?token={token}&simple_latest&no_unreads"
 # MAIL
 sendEmail: true
-mailFrom: ${ASTON_PARKING_MAIL_FROM}
+mailFrom: ${CROISSANTS_MAIL_FROM}
 spring:
   mail:
-    host: ${ASTON_PARKING_MAIL_HOST}
-    port: ${ASTON_PARKING_MAIL_PORT}
-    username: ${ASTON_PARKING_MAIL_USERNAME}
-    password: ${ASTON_PARKING_MAIL_PASSWORD}
+    host: ${CROISSANTS_MAIL_HOST}
+    port: ${CROISSANTS_MAIL_PORT}
+    username: ${CROISSANTS_MAIL_USERNAME}
+    password: ${CROISSANTS_MAIL_PASSWORD}
     protocol: smtp
     properties:
           mail:
@@ -34,13 +34,13 @@ spring:
 # MONGO
   data:
     mongodb:
-      uri: mongodb://${ASTON_PARKING_MONGO_URI}
+      uri: mongodb://${CROISSANTS_MONGO_URI}
 ##########################
 # SECURITY
 slack:
   client:
-    clientId: ${ASTON_PARKING_CLIENTID}
-    clientSecret: ${ASTON_PARKING_CLIENTSECRET}
+    clientId: ${CROISSANTS_CLIENTID}
+    clientSecret: ${CROISSANTS_CLIENTSECRET}
     accessTokenUri: https://slack.com/api/oauth.access
     userAuthorizationUri: https://slack.com/oauth/authorize
     tokenName: token
