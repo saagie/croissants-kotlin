@@ -1,12 +1,12 @@
 # Jeu Du Croissant
  ## Règles
-  - Tirage aléatoire chaque mercredi a 9h seul le selectionné est informé 
+  - Tirage aléatoire chaque mercredi à 9h; seul la personne selectionnée est informée 
   - Le selectionné a deux choix : 
      - Possible d'utiliser un joker une fois par mois
      - Accepter
      
 
-  - Tout le monde est prévenu à quand la personne selectionné a accepté
+  - Tout le monde est prévenu quand la personne selectionnée a accepté
   - Une page est disponible pour pièger les gens :
      - Possible une fois par heure
      - Augmente la probabilité d'être tirée au sort
@@ -15,7 +15,7 @@
   - Pas de coefficient maxi 
   - On peut être tiré max une fois par mois
   - A chaque tirage accepté on reset le coef à 1
-  - Coefficient pondéré par le nombre de precedent tirage de l'utilisateur
+  - Coefficient pondéré par le nombre de précédent tirage de l'utilisateur
 
 
  ## Avancement
