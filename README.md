@@ -31,8 +31,6 @@
 | Ajout dans l'historique    |      |          |  X  |
 | Max une fois/3 semaines    |      |          |  X  |
 | Synchro Google/slack       |      |          |  X  |
-| Malus non synchro          |      |          |  X  |
-| Malus pas croissant        |      |          |  X  |
 | Page Joker/Acceptation     |      |          |  X  |
 | Reset Joker                |      |          |  X  |
 | Accepter d'office          |      |          |  X  |
@@ -41,8 +39,6 @@
 | Se proposer                |      |          |  X  |
 | Statistique                |      |          |  X  |
 | Design                     |      |          |  X  |
-| Cas d'erreur               |      |          |  X  |
-| Test unitaire              |      |          |  X  |
 
 
 ## Copyright
