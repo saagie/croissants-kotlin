@@ -90,15 +90,6 @@ class UserService(
     }
 
 
-    fun resetAllSelectedAttribution() {
-        userDao.findAll()
-                .forEach(
-                        Consumer {
-                            it.alreadySelected = false
-                            userDao.save(it)
-                        })
-    }
-
     fun findByUnregister(unregister: Boolean) = userDao.findByUnregister(unregister)
     fun delete(userId: String) = userDao.delete(userId)
 
