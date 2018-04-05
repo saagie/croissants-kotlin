@@ -1,10 +1,5 @@
 package io.saagie.croissants.slack
 
-import io.saagie.croissants.dao.RequestDao
-import io.saagie.croissants.domain.Proposition
-import io.saagie.croissants.domain.State
-import io.saagie.croissants.service.DrawService
-import io.saagie.croissants.service.SpotService
 import io.saagie.croissants.service.UserService
 import me.ramswaroop.jbot.core.slack.models.Attachment
 import me.ramswaroop.jbot.core.slack.models.Message
@@ -15,20 +10,12 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.text.DecimalFormat
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.ArrayList
-import kotlin.math.round
 
 
 @RestController
 class SlackSlashCommand(
         val userService: UserService,
-        val drawService: DrawService,
-        val spotService: SpotService,
-        val slackBot: SlackBot,
-        val requestDao: RequestDao
+        val slackBot: SlackBot
 ) {
 
     @Value("\${url}")
@@ -224,23 +211,9 @@ class SlackSlashCommand(
                     """.trimIndent()
             }
             var requestMessage = "None."
-            val request = requestDao.findByUserId(userId)
-            if (request!=null && request.isNotEmpty()){
-                requestMessage = request.first().date.format(DateTimeFormatter.ofPattern("dd/MM"))
-            }
 
-            val users = drawService.sortAndFilterUsers()
-
-            val index = users.indexOfFirst { it.id == userId }
-            val allSpots = spotService.getAllSpots(State.FREE)
 
             var chance="<10%"
-            val size = allSpots!!.size
-            if (index>size){
-                chance="<10%"
-            }else {
-                chance="~${(100-((index.toDouble()/size.toDouble())*100))}%"
-            }
 
             val attachments = arrayOf(
                     Attachment().apply {
@@ -272,260 +245,6 @@ class SlackSlashCommand(
 
     }
 
-    @RequestMapping(value = ["/slack/attribution"],
-            method = [(RequestMethod.POST)],
-            consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
-    fun onReceiveAttributionCommand(@RequestParam("token") token: String,
-                                    @RequestParam("team_id") teamId: String,
-                                    @RequestParam("team_domain") teamDomain: String,
-                                    @RequestParam("channel_id") channelId: String,
-                                    @RequestParam("channel_name") channelName: String,
-                                    @RequestParam("user_id") userId: String,
-                                    @RequestParam("user_name") userName: String,
-                                    @RequestParam("command") command: String,
-                                    @RequestParam("text") text: String,
-                                    @RequestParam("response_url") responseUrl: String): Message {
-
-        val propositions = drawService.getAllPropositions()
-        val currentSchedules = drawService.getCurrentSchedules()
-        val nextSchedules = drawService.getNextSchedules()
-        val users = userService.getAll()
-
-        val message = Message("*******************\n")
-        message.text += slackBot.generateTextForSchedule(currentSchedules, null)
-        message.text += "*******************\n"
-        message.text += "*Next week\n\n"
-        message.text += "_Not accepted yet_\n"
-        message.text += slackBot.generateTextForPropositions(propositions!!, users, null)
-        message.text += "\n_Accepted_\n"
-        message.text += slackBot.generateTextForSchedule(nextSchedules, null)
-        message.text += "*******************\n"
 
 
-        return message
-    }
-
-
-    @RequestMapping(value = ["/slack/accept"],
-            method = [(RequestMethod.POST)],
-            consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
-    fun onReceiveAcceptCommand(@RequestParam("token") token: String,
-                               @RequestParam("team_id") teamId: String,
-                               @RequestParam("team_domain") teamDomain: String,
-                               @RequestParam("channel_id") channelId: String,
-                               @RequestParam("channel_name") channelName: String,
-                               @RequestParam("user_id") userId: String,
-                               @RequestParam("user_name") userName: String,
-                               @RequestParam("command") command: String,
-                               @RequestParam("text") text: String,
-                               @RequestParam("response_url") responseUrl: String): Message {
-
-
-        val message = Message("OK, your propositions are accepted.")
-        if (!drawService.acceptProposition(userId)) {
-            message.text = "You have no proposition for the next week."
-        }
-
-        return message
-    }
-
-    @RequestMapping(value = ["/slack/decline"],
-            method = [(RequestMethod.POST)],
-            consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
-    fun onReceiveDeclineCommand(@RequestParam("token") token: String,
-                                @RequestParam("team_id") teamId: String,
-                                @RequestParam("team_domain") teamDomain: String,
-                                @RequestParam("channel_id") channelId: String,
-                                @RequestParam("channel_name") channelName: String,
-                                @RequestParam("user_id") userId: String,
-                                @RequestParam("user_name") userName: String,
-                                @RequestParam("command") command: String,
-                                @RequestParam("text") text: String,
-                                @RequestParam("response_url") responseUrl: String): Message {
-
-
-        drawService.declineProposition(userId)
-
-        val message = Message("You've declined all your propositions")
-        return message
-    }
-
-    @RequestMapping(value = "/slack/release",
-            method = [(RequestMethod.POST)],
-            consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
-    fun onReceiveReleaseCommand(@RequestParam("token") token: String,
-                                @RequestParam("team_id") teamId: String,
-                                @RequestParam("team_domain") teamDomain: String,
-                                @RequestParam("channel_id") channelId: String,
-                                @RequestParam("channel_name") channelName: String,
-                                @RequestParam("user_id") userId: String,
-                                @RequestParam("user_name") userName: String,
-                                @RequestParam("command") command: String,
-                                @RequestParam("text") text: String,
-                                @RequestParam("response_url") responseUrl: String): Message {
-
-        try {
-            drawService.extractDate(text)
-            drawService.release(userId, text)
-
-            val message = Message("You have release the spot for the day (${text}). Another can now pick it. Thanks.")
-            return message
-
-        } catch (iae: IllegalArgumentException) {
-            return Message(iae.message)
-        }
-
-    }
-
-    @RequestMapping(value = ["/slack/pick"],
-            method = [(RequestMethod.POST)],
-            consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
-    fun onReceivePickCommand(@RequestParam("token") token: String,
-                             @RequestParam("team_id") teamId: String,
-                             @RequestParam("team_domain") teamDomain: String,
-                             @RequestParam("channel_id") channelId: String,
-                             @RequestParam("channel_name") channelName: String,
-                             @RequestParam("user_id") userId: String,
-                             @RequestParam("user_name") userName: String,
-                             @RequestParam("command") command: String,
-                             @RequestParam("text") text: String,
-                             @RequestParam("response_url") responseUrl: String): Message {
-
-        try {
-            val spot = drawService.pick(userId, text)
-            val message = Message("You have pick the ${spot} for the day (${text}) .")
-            return message
-        } catch (iae: IllegalArgumentException) {
-            return Message(iae.message)
-        }
-
-    }
-
-    @RequestMapping(value = ["/slack/pick-today"],
-            method = [(RequestMethod.POST)],
-            consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
-    fun onReceivePickTodayCommand(@RequestParam("token") token: String,
-                             @RequestParam("team_id") teamId: String,
-                             @RequestParam("team_domain") teamDomain: String,
-                             @RequestParam("channel_id") channelId: String,
-                             @RequestParam("channel_name") channelName: String,
-                             @RequestParam("user_id") userId: String,
-                             @RequestParam("user_name") userName: String,
-                             @RequestParam("command") command: String,
-                             @RequestParam("text") text: String,
-                             @RequestParam("response_url") responseUrl: String): Message {
-
-        try {
-            val spot = drawService.pick(userId, LocalDate.now())
-            val message = Message("You have pick the ${spot} for today.")
-            return message
-        } catch (iae: IllegalArgumentException) {
-            return Message(iae.message)
-        }
-
-    }
-
-    @RequestMapping(value = ["/slack/today"],
-            method = [(RequestMethod.POST)],
-            consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
-    fun onReceiveTodayCommand(@RequestParam("token") token: String,
-                                    @RequestParam("team_id") teamId: String,
-                                    @RequestParam("team_domain") teamDomain: String,
-                                    @RequestParam("channel_id") channelId: String,
-                                    @RequestParam("channel_name") channelName: String,
-                                    @RequestParam("user_id") userId: String,
-                                    @RequestParam("user_name") userName: String,
-                                    @RequestParam("command") command: String,
-                                    @RequestParam("text") text: String,
-                                    @RequestParam("response_url") responseUrl: String): Message {
-
-        val currentSchedules = drawService.getCurrentSchedules().filter { it.date == LocalDate.now() }
-
-        val message = Message("*******************\n")
-        message.text += "\nToday :\n"
-        message.text += slackBot.generateTextForSchedule(currentSchedules, null)
-        message.text += "*******************\n"
-
-
-        return message
-    }
-
-    @RequestMapping(value = ["/slack/planning"],
-            method = [(RequestMethod.POST)],
-            consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
-    fun onReceivePlanningCommand(@RequestParam("token") token: String,
-                              @RequestParam("team_id") teamId: String,
-                              @RequestParam("team_domain") teamDomain: String,
-                              @RequestParam("channel_id") channelId: String,
-                              @RequestParam("channel_name") channelName: String,
-                              @RequestParam("user_id") userId: String,
-                              @RequestParam("user_name") userName: String,
-                              @RequestParam("command") command: String,
-                              @RequestParam("text") text: String,
-                              @RequestParam("response_url") responseUrl: String): Message {
-
-        val propositions = drawService.getAllPropositions()!!.filter { it.userId ==  userId}
-        val currentSchedules = drawService.getCurrentSchedules()
-        val nextSchedules = drawService.getNextSchedules()
-        val users = userService.getAll()
-
-        val message = Message("*******************\n")
-        message.text += slackBot.generateTextForSchedule(currentSchedules, userId)
-        message.text += "*******************\n"
-        message.text += "*Next week\n\n"
-        message.text += "_Not accepted yet_\n"
-        message.text += slackBot.generateTextForPropositions(propositions as ArrayList<Proposition>, users,userId)
-        message.text += "\n_Accepted_\n"
-        message.text += slackBot.generateTextForSchedule(nextSchedules,userId)
-        message.text += "*******************\n"
-
-
-        return message
-    }
-
-    @RequestMapping(value = ["/slack/request"],
-            method = [(RequestMethod.POST)],
-            consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
-    fun onReceiveRequestCommand(@RequestParam("token") token: String,
-                                 @RequestParam("team_id") teamId: String,
-                                 @RequestParam("team_domain") teamDomain: String,
-                                 @RequestParam("channel_id") channelId: String,
-                                 @RequestParam("channel_name") channelName: String,
-                                 @RequestParam("user_id") userId: String,
-                                 @RequestParam("user_name") userName: String,
-                                 @RequestParam("command") command: String,
-                                 @RequestParam("text") text: String,
-                                 @RequestParam("response_url") responseUrl: String): Message {
-
-        try {
-            drawService.request(userId, text)
-            val message = Message("Your request for a spot for the day (${text}) is recorded.")
-            return message
-        } catch (iae: IllegalArgumentException) {
-            return Message(iae.message)
-        }
-    }
-
-    @RequestMapping(value = ["/slack/cancelrequest"],
-            method = [(RequestMethod.POST)],
-            consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
-    fun onReceiveCancelRequestCommand(@RequestParam("token") token: String,
-                                @RequestParam("team_id") teamId: String,
-                                @RequestParam("team_domain") teamDomain: String,
-                                @RequestParam("channel_id") channelId: String,
-                                @RequestParam("channel_name") channelName: String,
-                                @RequestParam("user_id") userId: String,
-                                @RequestParam("user_name") userName: String,
-                                @RequestParam("command") command: String,
-                                @RequestParam("text") text: String,
-                                @RequestParam("response_url") responseUrl: String): Message {
-
-        try {
-            drawService.cancelrequest(userId)
-            val message = Message("Your request is cancelled.")
-            return message
-        } catch (iae: IllegalArgumentException) {
-            return Message(iae.message)
-        }
-    }
 }

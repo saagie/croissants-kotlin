@@ -1,17 +1,10 @@
 package io.saagie.croissants.service
 
-import io.saagie.croissants.dao.ScheduleDao
 import io.saagie.croissants.dao.UserDao
 
 
 import io.saagie.croissants.domain.User
-import org.springframework.data.crossstore.ChangeSetPersister
-import org.springframework.format.annotation.DateTimeFormat
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeFormatterBuilder
 import java.util.function.Consumer
 @Service
 class UserService(
