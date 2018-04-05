@@ -1,0 +1,51 @@
+#APPLICATION
+## LOG
+logging:
+  level:
+    org.springframework.security: WARN
+    io.saagie: WARN
+    me.ramswaroop.jbot: WARN
+## GENERAL
+url: ${ASTON_PARKING_URL}
+# SLACK BOT
+slackBotToken: ${ASTON_PARKING_SLACKBOT_TOKEN}
+slackWebhookUrl: ${ASTON_PARKING_SLACK_WEBHOOK_URL}
+rtmUrl: "https://slack.com/api/rtm.start?token={token}&simple_latest&no_unreads"
+# MAIL
+sendEmail: true
+mailFrom: ${ASTON_PARKING_MAIL_FROM}
+spring:
+  mail:
+    host: ${ASTON_PARKING_MAIL_HOST}
+    port: ${ASTON_PARKING_MAIL_PORT}
+    username: ${ASTON_PARKING_MAIL_USERNAME}
+    password: ${ASTON_PARKING_MAIL_PASSWORD}
+    protocol: smtp
+    properties:
+          mail:
+            smtp:
+              starttls:
+                enable: false
+              auth: false
+              connectiontimeout: 5000
+              timeout: 5000
+              writetimeout: 5000
+
+# MONGO
+  data:
+    mongodb:
+      uri: mongodb://${ASTON_PARKING_MONGO_URI}
+##########################
+# SECURITY
+slack:
+  client:
+    clientId: ${ASTON_PARKING_CLIENTID}
+    clientSecret: ${ASTON_PARKING_CLIENTSECRET}
+    accessTokenUri: https://slack.com/api/oauth.access
+    userAuthorizationUri: https://slack.com/oauth/authorize
+    tokenName: token
+    authenticationScheme: query
+    clientAuthenticationScheme: form
+    scope: identity.basic,identity.email,identity.avatar,identity.team
+  resource:
+    userInfoUri: https://slack.com/api/users.identity?token=
