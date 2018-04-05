@@ -1,0 +1,23 @@
+sudo: required
+language: java
+
+services:
+  - docker
+jdk:
+  - oraclejdk8
+
+before_install:
+  - sudo apt-get -y install python3-pip
+  - sudo pip3 install -U pip
+
+script:
+   - ./gradlew mkdocsBuild
+   - ./gradlew assemble
+   - ./gradlew check
+   - ./gradlew docker
+
+after_success:
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+    docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+    ./gradlew dockerPush;
+    fi
