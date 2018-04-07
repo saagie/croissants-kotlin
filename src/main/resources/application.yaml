@@ -37,7 +37,9 @@ spring:
     url: jdbc:mysql://127.0.0.1:3306/croissants
     username: root
     password: root
-
+  jpa:
+    hibernate:
+      ddl-auto: update
 # MONGO
 #  data:
 #    mongodb:
