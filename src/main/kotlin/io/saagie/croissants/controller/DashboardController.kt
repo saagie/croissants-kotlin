@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class DashboardController(val userService: UserService) {
 
-    @PreAuthorize("isAnonymous() or isFullyAuthenticated()")
     @GetMapping("/dashboard")
     fun dashboard(): Dashboard {
         return Dashboard(

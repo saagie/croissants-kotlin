@@ -14,6 +14,9 @@ rtmUrl: "https://slack.com/api/rtm.start?token={token}&simple_latest&no_unreads"
 # MAIL
 sendEmail: true
 mailFrom: ${CROISSANTS_MAIL_FROM}
+security:
+  basic:
+    enabled: false
 spring:
   mail:
     host: ${CROISSANTS_MAIL_HOST}
