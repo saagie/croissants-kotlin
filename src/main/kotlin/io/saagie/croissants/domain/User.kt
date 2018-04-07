@@ -9,8 +9,8 @@ import javax.persistence.Entity
 @Entity
 data class User(
         @Id
-        val id: String?,
-        val username: String,
+        var id: String? = null,
+        var username: String? = null,
         var email: String? = null,
         var image_24: String? = null,
         var image_32: String? = null,
@@ -24,6 +24,7 @@ data class User(
         var activated: Boolean = false,
         var unregister: Boolean = false
 ) {
+
     fun status(): String {
         when {
             (enable && activated) -> return "Active"
