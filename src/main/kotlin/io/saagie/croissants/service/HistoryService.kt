@@ -24,4 +24,10 @@ class HistoryService (
     fun getAllByUser(userId: String): List<History> {
         return historyDao.findAllByIdUser(userId)
     }
+    fun getLastSelected(): History? {
+
+        return historyDao.findAll().maxBy { it.dateCroissant }
+
+    }
+
 }
