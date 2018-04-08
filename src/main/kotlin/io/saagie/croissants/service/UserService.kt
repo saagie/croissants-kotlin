@@ -5,26 +5,26 @@ import io.saagie.croissants.dao.UserDao
 
 import io.saagie.croissants.domain.User
 import org.springframework.stereotype.Service
-import java.util.function.Consumer
 @Service
 class UserService(
         val userDao: UserDao,
-        val emailService: EmailService) {
+        val emailService: EmailService,
+        val historyService: HistoryService
+
+) {
 
     fun registerUser(username: String, id: String): Boolean {
         if (!userDao.exists(id)) {
-            userDao.save(User(id = id, username = username))
+            val allHistory = historyService.getAll()
+            val weight = if (allHistory.isNotEmpty()) {
+                allHistory.groupBy { it.idUser }.minBy { it.component2().size }!!.component2().size
+            } else {
+                0
+            }
+            userDao.save(User(id = id, username = username, initialWeight = weight))
             return true
         }
         return false
-    }
-
-
-    fun unregisterUser(userId: String):Boolean {
-        val user = userDao.findOne(userId)
-        user.unregister=!user.unregister
-        userDao.save(user)
-        return user.unregister
     }
 
     fun updateUserInfo(map: Map<String, Any>) {
@@ -36,7 +36,6 @@ class UserService(
         }
         if (userDao.exists(id)) {
             val user = userDao.findOne(id)
-            val activatedUser = user.activated
             user.apply {
                 email = userMap.get("email") as String
                 image_24 = userMap.get("image_24") as String
@@ -45,13 +44,9 @@ class UserService(
                 image_72 = userMap.get("image_72") as String
                 image_192 = userMap.get("image_192") as String
                 image_512 = userMap.get("image_512") as String
-                activated = true
 
             }
-            if (!activatedUser) {
-                user.enable = true
-                emailService.profileCreated(user)
-            }
+
             userDao.save(user)
         }
     }
@@ -93,6 +88,10 @@ class UserService(
         userDao.save(users)
     }
 
+    fun getWeightedCoefficient(user: User): Int {
+        val countSelection = historyService.getAllByUser(user.id).size
+        return Math.floor((user.coefficient / ((countSelection+1)*0.5))*10).toInt()
+    }
 
     fun findByUnregister(unregister: Boolean) = userDao.findByUnregister(unregister)
     fun delete(userId: String) = userDao.delete(userId)

@@ -9,7 +9,7 @@ import javax.persistence.Entity
 @Entity
 data class User(
         @Id
-        var id: String? = null,
+        var id: String = "",
         var username: String? = null,
         var email: String? = null,
         var image_24: String? = null,
@@ -20,16 +20,14 @@ data class User(
         var image_512: String? = null,
         var creationDate: Date = Date.from(Instant.now()),
         var coefficient: Int = 0,
-        var enable: Boolean = false,
-        var activated: Boolean = false,
-        var unregister: Boolean = false
+        var initialWeight: Int = 0,
+        var enable: Boolean = false
 ) {
 
     fun status(): String {
         when {
-            (enable && activated) -> return "Active"
-            !activated -> return "Not activated"
-            else -> return "Hibernate"
+            (enable) -> return "Active"
+            else -> return "Inactive"
         }
     }
 
