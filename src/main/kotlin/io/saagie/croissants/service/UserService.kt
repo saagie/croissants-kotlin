@@ -30,6 +30,10 @@ class UserService(
     fun updateUserInfo(map: Map<String, Any>) {
         val userMap = map.get("user") as Map<*, *>
         val id = userMap.get("id") as String
+
+        if (! userDao.exists(id)) {
+            registerUser(userMap.get("name") as String, id)
+        }
         if (userDao.exists(id)) {
             val user = userDao.findOne(id)
             val activatedUser = user.activated
