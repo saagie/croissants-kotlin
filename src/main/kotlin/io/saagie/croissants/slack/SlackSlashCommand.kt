@@ -2,7 +2,7 @@ package io.saagie.croissants.slack
 
 import io.saagie.croissants.domain.User
 import io.saagie.croissants.service.UserService
-import io.saagie.croissants.service.DrawService
+//import io.saagie.croissants.service.DrawService
 import io.saagie.croissants.service.HistoryService
 import me.ramswaroop.jbot.core.slack.models.Attachment
 import me.ramswaroop.jbot.core.slack.models.Message
@@ -16,15 +16,14 @@ import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 import java.time.DayOfWeek
 import java.time.temporal.TemporalAdjusters
-
-
+import java.util.*
 
 
 @RestController
 class SlackSlashCommand(
         val userService: UserService,
         val historyService: HistoryService,
-        val drawService: DrawService,
+    //    val drawService: DrawService,
         val slackBot: SlackBot
 ) {
 
@@ -75,9 +74,6 @@ class SlackSlashCommand(
                 },
                 Attachment().apply {
                     setText("/c-propose dd/MM : to purpose the croissant  for the specified date (day/month)")
-                },
-                Attachment().apply {
-                    setText("/c-planning : to display personnal planning for the current and the next week")
                 }
         )
         richMessage.attachments = attachments
@@ -152,7 +148,7 @@ class SlackSlashCommand(
             val user = userService.get(userId)
             val weightedCoefficient = userService.getWeightedCoefficient(user)
             val draw = historyService.getAllByUser(user.id)
-            val chance = drawService.getChance(user)
+            val chance = "10"// drawService.getChance(user)
             val richMessage = RichMessage("Profile : ${user.username}")
 
             val attachments = arrayOf(
@@ -191,7 +187,7 @@ class SlackSlashCommand(
     @RequestMapping(value = ["/slack/selected"],
             method = [(RequestMethod.POST)],
             consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
-    fun onReceiveAttributionCommand(@RequestParam("token") token: String,
+    fun onReceiveSelectedCommand(@RequestParam("token") token: String,
                                     @RequestParam("team_id") teamId: String,
                                     @RequestParam("team_domain") teamDomain: String,
                                     @RequestParam("channel_id") channelId: String,
@@ -240,7 +236,7 @@ class SlackSlashCommand(
 
 
         val message = Message("OK, your selection are accepted.")
-        if (!drawService.acceptProposition(userId)) {
+        if (! historyService.acceptSelection(userId)) {
             message.text = "You have no selection for the next friday."
         }
 
@@ -262,7 +258,7 @@ class SlackSlashCommand(
                                 @RequestParam("response_url") responseUrl: String): Message {
 
 
-        drawService.declineProposition(userId)
+        historyService.declineSelection(userId)
 
         val message = Message("You've declined your selection")
         return message
@@ -271,7 +267,7 @@ class SlackSlashCommand(
     @RequestMapping(value = ["/slack/purpose"],
             method = [(RequestMethod.POST)],
             consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
-    fun onReceivePickCommand(@RequestParam("token") token: String,
+    fun onReceivePurposeCommand(@RequestParam("token") token: String,
                              @RequestParam("team_id") teamId: String,
                              @RequestParam("team_domain") teamDomain: String,
                              @RequestParam("channel_id") channelId: String,
@@ -283,7 +279,7 @@ class SlackSlashCommand(
                              @RequestParam("response_url") responseUrl: String): Message {
 
         try {
-            val result = drawService.purpose(userId, text)
+            val result = historyService.purpose(userId, historyService.extractDate(text))
             val message = if (result){
                 Message("You have purpose the croissant for the day (${text}) .")
             }else{
@@ -299,7 +295,7 @@ class SlackSlashCommand(
     @RequestMapping(value = ["/slack/purpose-next"],
             method = [(RequestMethod.POST)],
             consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
-    fun onReceivePickTodayCommand(@RequestParam("token") token: String,
+    fun onReceivePurposeNextCommand(@RequestParam("token") token: String,
                              @RequestParam("team_id") teamId: String,
                              @RequestParam("team_domain") teamDomain: String,
                              @RequestParam("channel_id") channelId: String,
@@ -313,7 +309,7 @@ class SlackSlashCommand(
         try {
             val input = LocalDate.now()
             val nextFriday = input.with(TemporalAdjusters.next(DayOfWeek.FRIDAY))
-            val result = drawService.purpose(userId, nextFriday)
+            val result = historyService.purpose(userId, nextFriday)
             val message = if (result){
                 Message("You have purpose the croissant for the day (${text}) .")
             }else{
@@ -330,7 +326,7 @@ class SlackSlashCommand(
     @RequestMapping(value = ["/slack/top-ten"],
             method = [(RequestMethod.POST)],
             consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
-    fun onReceivePlanningCommand(@RequestParam("token") token: String,
+    fun onReceiveToptenCommand(@RequestParam("token") token: String,
                               @RequestParam("team_id") teamId: String,
                               @RequestParam("team_domain") teamDomain: String,
                               @RequestParam("channel_id") channelId: String,
@@ -362,5 +358,28 @@ class SlackSlashCommand(
         return message
     }
 
+
+    @RequestMapping(value = ["/slack/random"],
+            method = [(RequestMethod.POST)],
+            consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
+    fun onReceiveRandomCommand(@RequestParam("token") token: String,
+                                 @RequestParam("team_id") teamId: String,
+                                 @RequestParam("team_domain") teamDomain: String,
+                                 @RequestParam("channel_id") channelId: String,
+                                 @RequestParam("channel_name") channelName: String,
+                                 @RequestParam("user_id") userId: String,
+                                 @RequestParam("user_name") userName: String,
+                                 @RequestParam("command") command: String,
+                                 @RequestParam("text") text: String,
+                                 @RequestParam("response_url") responseUrl: String): Message {
+
+
+        val fact = arrayOf("One of the developer lost lot of time because he forgot a 's' in url. And does'nt understand why he have a 404","90% of this app be develop in underwear !")
+
+        val message = Message("*******************\n")
+        message.text += "* ${ fact[Random().nextInt(fact.size)] }\n\n"
+          message.text += "*******************\n"
+        return message
+    }
 
 }
