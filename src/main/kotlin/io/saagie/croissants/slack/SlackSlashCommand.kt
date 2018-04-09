@@ -202,7 +202,7 @@ class SlackSlashCommand(
 
         var message = Message("*******************\n")
         if (history != null) {
-            val user = userService.get(history!!.idUser!!)
+            val user = userService.get(history!!.emailUser!!)
             val date= history.dateCroissant
             message.text += "Last selected person"
             message.text += "*******************\n"

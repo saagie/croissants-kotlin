@@ -30,7 +30,10 @@ class HistoryController(val historyService: HistoryService) {
         return historyService.getAllByUser(user_id)
     }
 
+    //on prend en compte aussi les 3 semaines dans le futur pour exclure les personnes qui se seraient proposées
+    // pour respecter la règle : "on ne peut être tiré au sort pour les croissants qu'une fois toutes les 3 semaines"
     fun getAllHistoryOfLast3Weeks(): List<History> {
-        return historyService.getAll().filter { it.dateCroissant > Date.from(Instant.now().minus(21, ChronoUnit.DAYS)) }
+//        return historyService.getAll().filter { it.dateCroissant > Date.from(Instant.now().minus(21, ChronoUnit.DAYS)) }
+        return historyService.getAll().filter { it.dateCroissant > Date.from(Instant.now().minus(21, ChronoUnit.DAYS)) && it.dateCroissant < Date.from(Instant.now().plus(21, ChronoUnit.DAYS))}
     }
 }

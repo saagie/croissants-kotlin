@@ -10,6 +10,6 @@ data class History(
         @Id
         val id: String? = null,
         val dateCroissant: Date = Date.from(Instant.now()),
-        val idUser: String? = null,
+        val emailUser: String? = null,
         val ok: Int = 1
 )

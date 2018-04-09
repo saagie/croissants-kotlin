@@ -12,7 +12,7 @@ class DrawService(val userService: UserService) {
     @GetMapping("/test_draw")
     fun drawUser(): User{
         val userList = userService.findUsersToDraw()
-        var coef: Int = 0
+        var coef: Int
         var drawList: MutableList<User> = mutableListOf()
         var rand: Int
 
@@ -30,4 +30,7 @@ class DrawService(val userService: UserService) {
 
         return drawList[rand]
     }
+
+
+
 }

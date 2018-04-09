@@ -21,7 +21,7 @@ class UserService(
         if (!userDao.exists(id)) {
             val allHistory = historyService.getAll()
             val weight = if (allHistory.isNotEmpty()) {
-                allHistory.groupBy { it.idUser }.minBy { it.component2().size }!!.component2().size
+                allHistory.groupBy { it.emailUser }.minBy { it.component2().size }!!.component2().size
             } else {
                 0
             }
@@ -107,8 +107,8 @@ class UserService(
         var userList: MutableList<User> = mutableListOf()
 
         history.forEach {
-            if (!userId.contains(it.idUser)){
-                userId.add(it.idUser)
+            if (!userId.contains(it.emailUser)){
+                userId.add(it.emailUser)
             }
         }
 
