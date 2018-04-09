@@ -93,7 +93,6 @@ class UserService(
         return Math.floor((user.coefficient / ((countSelection+1)*0.5))*10).toInt()
     }
 
-    fun findByUnregister(unregister: Boolean) = userDao.findByUnregister(unregister)
     fun delete(userId: String) = userDao.delete(userId)
 
 }
