@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.DayOfWeek
 import java.time.temporal.TemporalAdjusters
@@ -147,8 +148,10 @@ class SlackSlashCommand(
         try {
             val user = userService.get(userId)
             val weightedCoefficient = userService.getWeightedCoefficient(user)
-            val draw = historyService.getAllByUser(user.id)
-            val chance = "10"// drawService.getChance(user)
+            val draw = historyService.getAllByUser(user.email!!).size
+            val totalCoef = userService.getAllActive().sumBy { userService.getWeightedCoefficient(it) }
+            val chance:Double= ((weightedCoefficient / totalCoef.toDouble())*100)
+            println(chance)
             val richMessage = RichMessage("Profile : ${user.username}")
 
             val attachments = arrayOf(
@@ -171,7 +174,7 @@ class SlackSlashCommand(
                         setText("Status :  ${user.status()}")
                     },
                     Attachment().apply {
-                        setText("Chance of being selected :  ${chance}")
+                        setText("Chance of being selected :  ${ BigDecimal(chance).setScale(2, BigDecimal.ROUND_HALF_UP).toDouble() }%")
                     }
             )
             richMessage.attachments = attachments
@@ -338,18 +341,18 @@ class SlackSlashCommand(
                               @RequestParam("response_url") responseUrl: String): Message {
 
 
-        val users = userService.getAll()
-        users.sortedBy { userService.getWeightedCoefficient(it) }
+        var users = userService.getAll().sortedBy { userService.getWeightedCoefficient(it) }
 
         val message = Message("*******************\n")
         message.text += "*Top Ten\n\n"
-        var i = 10
+        var i = 30
         var current:User
-       while (i>=0){
+       while (i>0){
 
-          current = users.first()
-
-           message.text += "${ 10-i }. ${ current.username } : ${ userService.getWeightedCoefficient(current) } \n"
+          current = users.last()
+           message.text += "${ 11-i }. ${ current.username } : ${ userService.getWeightedCoefficient(current) } \n"
+           users = users.dropLast(1)
+           i--
        }
 
         message.text += "*******************\n"
@@ -358,6 +361,43 @@ class SlackSlashCommand(
         return message
     }
 
+
+
+    @RequestMapping(value = ["/slack/top"],
+            method = [(RequestMethod.POST)],
+            consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
+    fun onReceiveTopCommand(@RequestParam("token") token: String,
+                               @RequestParam("team_id") teamId: String,
+                               @RequestParam("team_domain") teamDomain: String,
+                               @RequestParam("channel_id") channelId: String,
+                               @RequestParam("channel_name") channelName: String,
+                               @RequestParam("user_id") userId: String,
+                               @RequestParam("user_name") userName: String,
+                               @RequestParam("command") command: String,
+                               @RequestParam("text") text: String,
+                               @RequestParam("response_url") responseUrl: String): Message {
+
+
+        var users = userService.getAll().sortedBy { userService.getWeightedCoefficient(it) }
+
+        val message = Message("*******************\n")
+        message.text += "*Top\n\n"
+        val lsize= users.size
+        var i = lsize
+        var current:User
+        while (i>0){
+
+            current = users.last()
+            message.text += "${ lsize+1 -i }. ${ current.username } : ${ userService.getWeightedCoefficient(current) } \n"
+            users = users.dropLast(1)
+            i--
+        }
+
+        message.text += "*******************\n"
+
+
+        return message
+    }
 
     @RequestMapping(value = ["/slack/random"],
             method = [(RequestMethod.POST)],

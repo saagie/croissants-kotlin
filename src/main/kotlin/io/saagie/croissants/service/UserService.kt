@@ -33,15 +33,16 @@ class UserService(
 
     fun updateUserInfo(map: Map<String, Any>) {
         val userMap = map.get("user") as Map<*, *>
-        val id = userMap.get("id") as String
+        val idUser = userMap.get("id") as String
+        val email = userMap.get("email") as String
 
-        if (! userDao.exists(id)) {
-            registerUser(userMap.get("name") as String, id)
+        if ( userDao.findOneByEmail(email) == null) {
+            registerUser(userMap.get("name") as String, idUser)
         }
-        if (userDao.exists(id)) {
-            val user = userDao.findOne(id)
+        if (userDao.exists(email)) {
+            val user = userDao.findOneByEmail(email)
             user.apply {
-                email = userMap.get("email") as String
+                id = userMap.get("id") as String
                 image_24 = userMap.get("image_24") as String
                 image_32 = userMap.get("image_32") as String
                 image_48 = userMap.get("image_48") as String
@@ -56,8 +57,8 @@ class UserService(
     }
 
     fun get(id: String): User {
-        if (userDao.exists(id)) {
-            return userDao.findOne(id)
+        if (userDao.findOneById(id) != null) {
+            return userDao.findOneById(id)
         }
         throw IllegalArgumentException("User (id:${id}) not found")
     }
@@ -93,8 +94,8 @@ class UserService(
     }
 
     fun getWeightedCoefficient(user: User): Int {
-        val countSelection = historyService.getAllByUser(user.id).size
-        return Math.floor((user.coefficient / ((countSelection+1)*0.5))*10).toInt()
+        val countSelection = historyService.getAllByUser(user.email!!).size
+        return Math.floor(user.coefficient / ((countSelection+1)*0.5)).toInt()
     }
 
     fun delete(userId: String) = userDao.delete(userId)

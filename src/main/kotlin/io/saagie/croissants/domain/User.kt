@@ -8,9 +8,9 @@ import javax.persistence.Entity
 
 @Entity
 data class User(
-        @Id
         var id: String = "",
         var username: String? = null,
+        @Id
         var email: String? = null,
         var image_24: String? = null,
         var image_32: String? = null,

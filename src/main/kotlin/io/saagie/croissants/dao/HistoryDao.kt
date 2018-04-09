@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface HistoryDao : CrudRepository<History, String> {
-    fun findAllByIdUser(idUser: String?): List<History>
+    fun findAllByEmailUser(idUser: String?): List<History>
 }

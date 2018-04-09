@@ -25,7 +25,7 @@ class HistoryService(
     }
 
     fun getAllByUser(userId: String): List<History> {
-        return historyDao.findAllByIdUser(userId)
+        return historyDao.findAllByEmailUser(userId)
     }
 
     fun getLastSelected(): History? {
