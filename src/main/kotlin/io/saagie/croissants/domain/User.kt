@@ -19,7 +19,7 @@ data class User(
         var image_192: String? = null,
         var image_512: String? = null,
         var creationDate: Date = Date.from(Instant.now()),
-        var coefficient: Int = 0,
+        var coefficient: Int = 1,
         var initialWeight: Int = 0,
         var enable: Boolean = false
 ) {
