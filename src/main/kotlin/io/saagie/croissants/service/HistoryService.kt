@@ -35,6 +35,10 @@ class HistoryService(
         return historyDao.findAll().filter { it.dateCroissant > Date.from(Instant.now()) && it.dateCroissant <= utilService.localDateToDate(utilService.getNextFriday()) }.firstOrNull()
     }
 
+    fun getNextSelected(): List<History?> {
+        return historyDao.findAll().filter { it.dateCroissant > Date.from(Instant.now()) && it.ok == 1}
+    }
+
     fun getByDate(date: Date): List<History> {
         return historyDao.findByDateCroissant(date).sortedBy { it.id }
     }

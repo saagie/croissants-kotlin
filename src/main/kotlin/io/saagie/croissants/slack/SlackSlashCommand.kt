@@ -224,6 +224,40 @@ class SlackSlashCommand(
         return message
     }
 
+    @RequestMapping(value = ["/slack/selected-next"],
+            method = [(RequestMethod.POST)],
+            consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
+    fun onReceiveSelectedNextCommand(@RequestParam("token") token: String,
+                                    @RequestParam("team_id") teamId: String,
+                                    @RequestParam("team_domain") teamDomain: String,
+                                    @RequestParam("channel_id") channelId: String,
+                                    @RequestParam("channel_name") channelName: String,
+                                    @RequestParam("user_id") userId: String,
+                                    @RequestParam("user_name") userName: String,
+                                    @RequestParam("command") command: String,
+                                    @RequestParam("text") text: String,
+                                    @RequestParam("response_url") responseUrl: String): Message {
+
+        val history = historyService.getNextSelected()
+
+        var message = Message("*******************\n")
+
+        if (history.isEmpty())
+        {
+            message.text += "No next selected person found\n"
+            message.text += "*******************\n"
+        }else{
+            history.forEach {
+                val user = userService.getByEmail(it!!.emailUser!!)
+                val date= it.dateCroissant
+                message.text += "Next Selected is : *${ user.username}* for ${ date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().format(DateTimeFormatter.ofPattern("dd/MM/YY")) }  \n\n"
+                message.text += "*******************\n"
+            }
+        }
+
+        return message
+    }
+
 
     @RequestMapping(value = ["/slack/accept"],
             method = [(RequestMethod.POST)],
