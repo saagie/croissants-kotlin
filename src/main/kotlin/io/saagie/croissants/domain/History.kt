@@ -11,5 +11,21 @@ data class History(
         val id: String? = null,
         val dateCroissant: Date = Date.from(Instant.now()),
         val emailUser: String? = null,
-        val ok: Int = 1
-)
+        //Value of OK
+        // 0 = Waiting answer
+        // 1 = Accepted
+        // 2 = Refused
+        var ok: Int = 0
+){
+
+        fun setAccepted(): History{
+                this.ok=1
+                return this
+        }
+        fun setRefused(): History{
+                this.ok=1
+                return this
+
+        }
+
+}

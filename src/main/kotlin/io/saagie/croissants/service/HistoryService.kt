@@ -4,13 +4,15 @@ import io.saagie.croissants.dao.HistoryDao
 import io.saagie.croissants.dao.UserDao
 import io.saagie.croissants.domain.History
 import org.springframework.stereotype.Service
+import java.time.Instant
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeParseException
+import java.time.temporal.ChronoUnit
+import java.util.*
 
 @Service
 class HistoryService(
         val historyDao: HistoryDao,
+        val utilService: UtilService,
         val userDao: UserDao) {
 
     fun get(id: String): History {
@@ -24,41 +26,44 @@ class HistoryService(
         return historyDao.findAll() as List<History>
     }
 
-    fun getAllByUser(userId: String): List<History> {
-        return historyDao.findAllByEmailUser(userId)
+    fun getAllByEmailUser(userEmail: String): List<History> {
+        return historyDao.findAllByEmailUser(userEmail)
+    }
+
+    fun getAllByIdUser(userId: String): List<History> {
+
+        return getAllByEmailUser(userDao.findOneById(userId).email!!)
     }
 
     fun getLastSelected(): History? {
 
-        return historyDao.findAll().maxBy { it.dateCroissant }
-
+        return historyDao.findAll().filter { it.dateCroissant > Date.from(Instant.now()) && it.dateCroissant < Date.from(Instant.now().plus(3, ChronoUnit.DAYS)) }.firstOrNull()
     }
 
     fun acceptSelection(userId: String): Boolean {
+        var history = getAllByIdUser(userId).filter { it.dateCroissant > Date.from(Instant.now()) && it.dateCroissant < Date.from(Instant.now().plus(3, ChronoUnit.DAYS)) }
+       if (history.isEmpty()) return false
+        save(history.first().setAccepted())
         return true
     }
 
     fun declineSelection(userId: String): Boolean {
+
+        var history = getAllByIdUser(userId).filter { it.dateCroissant > Date.from(Instant.now()) && it.dateCroissant < Date.from(Instant.now().plus(3, ChronoUnit.DAYS)) }
+        if (history.isEmpty()) return false
+        save(history.first().setRefused())
         return true
 
     }
 
-    fun purpose(userId: String, date: LocalDate): Boolean {
+    fun purpose(userId: String, localdate: LocalDate): Boolean {
+        val user = userDao.findOneById(userId)
+        save(History(dateCroissant =  utilService.localDatetoDate(localdate) , emailUser = user.email, ok = 1))
         return true
 
     }
 
-    fun extractDate(text: String): LocalDate {
-        val now = LocalDate.now()
-        try {
-            val date = LocalDate.parse(text + "/${now.year}", DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-            if (now.isAfter(date)) {
-                throw IllegalArgumentException("Date can't be before today")
-            }
-            return date
-        } catch (e: DateTimeParseException) {
-            throw IllegalArgumentException("Date format is not correct : dd/MM (day/month)")
-        }
+    fun save(history: History) {
+        historyDao.save(history)
     }
-
 }

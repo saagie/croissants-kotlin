@@ -1,9 +1,9 @@
 package io.saagie.croissants.slack
 
-import io.saagie.croissants.domain.User
 import io.saagie.croissants.service.UserService
-//import io.saagie.croissants.service.DrawService
+import io.saagie.croissants.service.DrawService
 import io.saagie.croissants.service.HistoryService
+import io.saagie.croissants.service.UtilService
 import me.ramswaroop.jbot.core.slack.models.Attachment
 import me.ramswaroop.jbot.core.slack.models.Message
 import me.ramswaroop.jbot.core.slack.models.RichMessage
@@ -14,9 +14,6 @@ import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.math.BigDecimal
-import java.time.LocalDate
-import java.time.DayOfWeek
-import java.time.temporal.TemporalAdjusters
 import java.util.*
 
 
@@ -24,7 +21,8 @@ import java.util.*
 class SlackSlashCommand(
         val userService: UserService,
         val historyService: HistoryService,
-    //    val drawService: DrawService,
+        val utilService: UtilService,
+        val drawService: DrawService,
         val slackBot: SlackBot
 ) {
 
@@ -54,6 +52,12 @@ class SlackSlashCommand(
                 },
                 Attachment().apply {
                     setText("/c-selected : to display selected for the next friday")
+                },
+                Attachment().apply {
+                    setText("/c-trap : to trap a unlock workstation")
+                },
+                Attachment().apply {
+                    setText("/c-top : to see all coefficient")
                 },
                 Attachment().apply {
                     setText("/c-top-ten : to see top ten highest coefficient")
@@ -148,10 +152,9 @@ class SlackSlashCommand(
         try {
             val user = userService.get(userId)
             val weightedCoefficient = userService.getWeightedCoefficient(user)
-            val draw = historyService.getAllByUser(user.email!!).size
+            val draw = historyService.getAllByEmailUser(user.email!!).size
             val totalCoef = userService.getAllActive().sumBy { userService.getWeightedCoefficient(it) }
             val chance:Double= ((weightedCoefficient / totalCoef.toDouble())*100)
-            println(chance)
             val richMessage = RichMessage("Profile : ${user.username}")
 
             val attachments = arrayOf(
@@ -282,7 +285,7 @@ class SlackSlashCommand(
                              @RequestParam("response_url") responseUrl: String): Message {
 
         try {
-            val result = historyService.purpose(userId, historyService.extractDate(text))
+            val result = historyService.purpose(userId, utilService.extractDate(text))
             val message = if (result){
                 Message("You have purpose the croissant for the day (${text}) .")
             }else{
@@ -310,15 +313,12 @@ class SlackSlashCommand(
                              @RequestParam("response_url") responseUrl: String): Message {
 
         try {
-            val input = LocalDate.now()
-            val nextFriday = input.with(TemporalAdjusters.next(DayOfWeek.FRIDAY))
-            val result = historyService.purpose(userId, nextFriday)
-            val message = if (result){
+            val result = historyService.purpose(userId, drawService.getNextFriday())
+            return if (result){
                 Message("You have purpose the croissant for the day (${text}) .")
             }else{
                 Message("Someone already purpose the croissant for the day (${text}) .")
             }
-            return message
         } catch (iae: IllegalArgumentException) {
             return Message(iae.message)
         }
@@ -341,19 +341,15 @@ class SlackSlashCommand(
                               @RequestParam("response_url") responseUrl: String): Message {
 
 
-        var users = userService.getAll().sortedBy { userService.getWeightedCoefficient(it) }
+        var users = userService.getAll().sortedByDescending { userService.getWeightedCoefficient(it) }
 
         val message = Message("*******************\n")
-        message.text += "*Top Ten\n\n"
-        var i = 30
-        var current:User
-       while (i>0){
+        message.text += "*Top Ten*\n\n"
+        val nkeep = 10
+        var i = nkeep
+        users = users.take(nkeep)
+        users.map({  message.text += "${ nkeep+1 - i-- }. ${ it.username } : ${ userService.getWeightedCoefficient(it)  } \n"})
 
-          current = users.last()
-           message.text += "${ 11-i }. ${ current.username } : ${ userService.getWeightedCoefficient(current) } \n"
-           users = users.dropLast(1)
-           i--
-       }
 
         message.text += "*******************\n"
 
@@ -378,21 +374,13 @@ class SlackSlashCommand(
                                @RequestParam("response_url") responseUrl: String): Message {
 
 
-        var users = userService.getAll().sortedBy { userService.getWeightedCoefficient(it) }
+        var users = userService.getAll().sortedByDescending { userService.getWeightedCoefficient(it) }
 
         val message = Message("*******************\n")
-        message.text += "*Top\n\n"
+        message.text += "*Top*\n\n"
         val lsize= users.size
         var i = lsize
-        var current:User
-        while (i>0){
-
-            current = users.last()
-            message.text += "${ lsize+1 -i }. ${ current.username } : ${ userService.getWeightedCoefficient(current) } \n"
-            users = users.dropLast(1)
-            i--
-        }
-
+        users.map({  message.text += "${ lsize+1 - i-- }. ${ it.username } : ${ userService.getWeightedCoefficient(it)  } \n"})
         message.text += "*******************\n"
 
 
@@ -414,12 +402,41 @@ class SlackSlashCommand(
                                  @RequestParam("response_url") responseUrl: String): Message {
 
 
-        val fact = arrayOf("One of the developer lost lot of time because he forgot a 's' in url. And does'nt understand why he have a 404","90% of this app be develop in underwear !")
+        val fact = arrayOf(
+                "One of the developer lost lot of time because he forgot a 's' in url. And doesn't understand why he have a 404",
+                "90% of this app be develop in underwear, as our CTO learn to us",
+                "30% of source code has been taken from aston-parking develop by Pierre Leresteux",
+                "One of the developer ask for support to Pierre Leresteux everyday (Sunday include) and Pierre always answer",
+                "Lot of prince were ~killed~ eaten during the development of this app",
+                "5% of code come from StackOverflow",
+                "As this app doesn't be tested by Sandrine, we expect many bugs"
+        )
 
         val message = Message("*******************\n")
         message.text += "* ${ fact[Random().nextInt(fact.size)] }\n\n"
           message.text += "*******************\n"
         return message
     }
+    @RequestMapping(value = ["/slack/trap"],
+            method = [(RequestMethod.POST)],
+            consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
+    fun onReceiveTrapCommand(@RequestParam("token") token: String,
+                               @RequestParam("team_id") teamId: String,
+                               @RequestParam("team_domain") teamDomain: String,
+                               @RequestParam("channel_id") channelId: String,
+                               @RequestParam("channel_name") channelName: String,
+                               @RequestParam("user_id") userId: String,
+                               @RequestParam("user_name") userName: String,
+                               @RequestParam("command") command: String,
+                               @RequestParam("text") text: String,
+                               @RequestParam("response_url") responseUrl: String): Message {
 
+        userService.save(userService.get(userId).incrementCoefficient(10))
+
+        val message = Message("*******************\n")
+        message.text += ":flic: *Un default de sécurisation à été répéré* \n\n"
+        message.text += "+10 point au croissant !* \n\n"
+        message.text += "*******************\n"
+        return message
+    }
 }

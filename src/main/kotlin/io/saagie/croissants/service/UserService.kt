@@ -94,7 +94,7 @@ class UserService(
     }
 
     fun getWeightedCoefficient(user: User): Int {
-        val countSelection = historyService.getAllByUser(user.email!!).size
+        val countSelection = historyService.getAllByEmailUser(user.email!!).size
         return Math.floor(user.coefficient / ((countSelection+1)*0.5)).toInt()
     }
 

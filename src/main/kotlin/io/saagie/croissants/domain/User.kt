@@ -31,7 +31,8 @@ data class User(
         }
     }
 
-    fun incrementCoefficient( inc: Int) {
+    fun incrementCoefficient( inc: Int): User {
         this.coefficient = this.coefficient + inc
+        return this
     }
 }
