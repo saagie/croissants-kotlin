@@ -1,10 +1,12 @@
 package io.saagie.croissants.service;
 
 import org.springframework.stereotype.Service;
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
+import java.time.temporal.TemporalAdjusters
 import java.util.*
 
 @Service
@@ -26,5 +28,9 @@ class UtilService {
     fun localDatetoDate(localDate: LocalDate): Date {
 
         return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant())
+    }
+
+    fun getNextFriday(): LocalDate {
+        return LocalDate.now().with(TemporalAdjusters.next(DayOfWeek.FRIDAY))
     }
 }
