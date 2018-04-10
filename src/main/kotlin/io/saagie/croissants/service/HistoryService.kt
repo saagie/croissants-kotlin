@@ -40,11 +40,13 @@ class HistoryService(
     }
 
     fun getByDate(date: Date): List<History> {
-        return historyDao.findByDateCroissant(date).sortedBy { it.id }
+
+        return historyDao.findAll().filter { it.dateCroissant > utilService.localDateToDate( utilService.dateToLocalDate(date).minusDays(1)) &&  it.dateCroissant <= utilService.localDateToDate( utilService.dateToLocalDate(date))  }.sortedBy { it.id }
+
     }
 
     fun getByDrawDate(date: Date): List<History> {
-        return historyDao.findByDateCroissant(date).filter { it.ok == 0 && it.dateDraw < date}.sortedBy { it.id }
+        return getByDate(utilService.localDateToDate(utilService.getNextFriday())).filter { it.ok == 0  && it.dateDraw < date }
     }
 
     //on prend en compte aussi les 3 semaines dans le futur pour exclure les personnes qui se seraient proposées

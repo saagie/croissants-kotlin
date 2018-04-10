@@ -36,13 +36,18 @@ class DrawService(val userService: UserService,
     }
 
     @Scheduled(cron = "0 0 1 * * *")
-    fun updateCoef() {
-        val history = historyService.getByDate(utilService.localDateToDate(LocalDate.now())).filter { it.ok == 1 } as History
+    fun resetCoef() {
+        val history = historyService.getByDate(utilService.localDateToDate(LocalDate.now())).filter { it.ok == 1 }.firstOrNull()
         if (history != null) {
             var user = userService.getByEmail(history.emailUser!!)
             user.coefficient=1
             userService.save(user)
         }
+    }
+
+    @Scheduled(cron = "0 0 1 * * MON")
+    fun increaseCoef() {
+         userService.getAll().map { userService.save(it.incrementCoefficient(5)) }
     }
 
     @Scheduled(cron = "0 */30 * * * *")

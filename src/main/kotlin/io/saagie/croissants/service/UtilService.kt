@@ -30,6 +30,10 @@ class UtilService {
         return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant())
     }
 
+    fun dateToLocalDate(date: Date): LocalDate{
+        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+    }
+
     fun getNextFriday(): LocalDate {
         return LocalDate.now().with(TemporalAdjusters.next(DayOfWeek.FRIDAY))
     }
