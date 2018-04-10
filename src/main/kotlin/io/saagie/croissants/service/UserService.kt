@@ -105,7 +105,7 @@ class UserService(
 
     //return all the users without the ones draw during the last 3 weeks and the next 3 weeks
     fun findUsersToDraw(): List<User> {
-        val history = historyService.getAllHistoryOfLast3Weeks()
+        val history = historyService.getAllExcludedHistory()
         val userId: MutableList<String?> = mutableListOf()
         var listUsers = userDao.findByEnable(true)
         var userList: MutableList<User> = mutableListOf()

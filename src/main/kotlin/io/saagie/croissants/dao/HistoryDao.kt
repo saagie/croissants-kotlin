@@ -8,5 +8,5 @@ import java.util.*
 @Repository
 interface HistoryDao : CrudRepository<History, String> {
     fun findAllByEmailUser(emailUser: String?): List<History>
-    fun findByDateCroissant(dateCroissant: Date): History
+    fun findByDateCroissant(dateCroissant: Date): List<History>
 }

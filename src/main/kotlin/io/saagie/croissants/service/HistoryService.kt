@@ -35,15 +35,17 @@ class HistoryService(
         return historyDao.findAll().filter { it.dateCroissant > Date.from(Instant.now()) && it.dateCroissant <= utilService.localDateToDate(utilService.getNextFriday()) }.firstOrNull()
     }
 
-    fun getByDate(date: Date): History {
-        return historyDao.findByDateCroissant(date)
+    fun getByDate(date: Date): List<History> {
+        return historyDao.findByDateCroissant(date).sortedBy { it.id }
     }
 
     //on prend en compte aussi les 3 semaines dans le futur pour exclure les personnes qui se seraient proposées
     // pour respecter la règle : "on ne peut être tiré au sort pour les croissants qu'une fois toutes les 3 semaines"
-    fun getAllHistoryOfLast3Weeks(): List<History> {
-//        return historyService.getAll().filter { it.dateCroissant > Date.from(Instant.now().minus(21, ChronoUnit.DAYS)) }
-        return getAll().filter { it.dateCroissant > Date.from(Instant.now().minus(21, ChronoUnit.DAYS)) && it.dateCroissant < Date.from(Instant.now().plus(21, ChronoUnit.DAYS)) }
+    //on exclut également des retirages de la semaine les personnes ayant déjà décliné
+    fun getAllExcludedHistory(): List<History> {
+        return getAll().filter {
+            (it.dateCroissant > Date.from(Instant.now().minus(21, ChronoUnit.DAYS)) && it.dateCroissant < Date.from(Instant.now().plus(21, ChronoUnit.DAYS)) && it.ok == 1 )
+                    && ( it.dateCroissant > Date.from(Instant.now()) && it.dateCroissant < Date.from(Instant.now().plus(4, ChronoUnit.DAYS)) && it.ok == 2 )  }
     }
 
 

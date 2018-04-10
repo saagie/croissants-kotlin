@@ -19,7 +19,9 @@ class DrawService(val userService: UserService,
     @Scheduled(cron = "0 0 8 * * WED")
     fun scheduleSelection() {
         val nextFriday = utilService.getNextFriday()
-        if (historyService.getByDate(utilService.localDateToDate(nextFriday)) == null) {
+        val doDraw = historyService.getByDate(utilService.localDateToDate(nextFriday)).filter { it.ok != 2 }.isEmpty()
+
+        if (doDraw){
             val userDraw = this.drawUser()
             historyService.save(History(emailUser = userDraw.email, dateCroissant = utilService.localDateToDate(nextFriday)))
             slackBot.sendDM(userDraw,announcementMessage(nextFriday))
@@ -29,7 +31,7 @@ class DrawService(val userService: UserService,
 
     @Scheduled(cron = "0 0 1 * * *")
     fun updateCoef() {
-        val history = historyService.getByDate(utilService.localDateToDate(LocalDate.now()))
+        val history = historyService.getByDate(utilService.localDateToDate(LocalDate.now())).filter { it.ok == 1 } as History
         if (history != null) {
             var user = userService.getByEmail(history.emailUser as String)
             user.coefficient=1
@@ -71,7 +73,6 @@ class DrawService(val userService: UserService,
         if (history.isEmpty()) return false
         historyService.save(history.first().setRefused())
         userService.save(userService.findOneById(userId).incrementCoefficient(20))
-        //TODO uncomment
         scheduleSelection()
         return true
 
