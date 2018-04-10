@@ -404,19 +404,16 @@ class SlackSlashCommand(
 
 
         val fact = arrayOf(
-                "One of the developer lost lot of time because he forgot a 's' in url. And doesn't understand why he have a 404",
-                "90% of this app be develop in underwear, as our CTO learn to us",
-                "30% of source code has been taken from aston-parking develop by Pierre Leresteux",
-                "One of the developer ask for support to Pierre Leresteux everyday (Sunday include) and Pierre always answer",
-                "Lot of prince were ~killed~ eaten during the development of this app",
-                "5% of code come from StackOverflow",
-                "As this app doesn't be tested by Sandrine, we expect many bugs"
+                "One of the developer lost lot of time because he forgot a 's' in url and doesn't understand why he have a 404*",
+                "90% of this app be develop in underwear, as our CTO learn to us*",
+                "30% of source code has been taken from aston-parking develop by Pierre Leresteux*",
+                "One of the developer ask for support to Pierre Leresteux everyday (Sunday include) and Pierre always answer*",
+                "Lot of prince were ~killed~ eaten during the development of this app*",
+                "5% of code come from StackOverflow*",
+                "As this app doesn't be tested by Sandrine, we expect many bugs*"
         )
 
-        val message = Message("*******************\n")
-        message.text += "* ${ fact[Random().nextInt(fact.size)] }\n\n"
-          message.text += "*******************\n"
-        return message
+        return  Message("* ${ fact[Random().nextInt(fact.size)] }\n\n")
     }
     @RequestMapping(value = ["/slack/trap"],
             method = [(RequestMethod.POST)],
