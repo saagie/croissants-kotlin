@@ -16,6 +16,14 @@ import org.springframework.web.socket.WebSocketSession
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
+import org.springframework.http.ResponseEntity
+import org.springframework.http.HttpEntity
+import org.apache.catalina.manager.StatusTransformer.setContentType
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RestController
+import java.nio.charset.Charset
 
 
 @Component
@@ -70,8 +78,22 @@ class SlackBot : Bot() {
         }
     }
 
+    fun sendDM(user: User,message: String) {
 
+        val restTemplate = RestTemplate()
+        try {
+            val requestJson = "{\"token\":\"$slackToken\",\"channel\":\"@${user.username}\",\"text\":\"$message\",\"username\":\"Croissants\"}"
+            val url = "https://slack.com/api/chat.postMessage"
+            val headers = HttpHeaders()
+            headers.contentType = MediaType.APPLICATION_JSON
+            headers.acceptCharset = arrayListOf(Charsets.UTF_8)
+            headers.set("Authorization","Bearer $slackToken")
 
-
+            val entity = HttpEntity<String>(requestJson, headers)
+            restTemplate.postForEntity(url, entity, String::class.java)
+        } catch (e: RestClientException) {
+            logger.error("Error posting to Slack Incoming Webhook: ", e)
+        }
+    }
 
 }

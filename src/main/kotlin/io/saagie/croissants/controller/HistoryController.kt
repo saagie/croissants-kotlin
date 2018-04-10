@@ -27,7 +27,7 @@ class HistoryController(val historyService: HistoryService) {
 
     @GetMapping("/user/{user_id}/history")
     fun getAllHistoryByUser(@PathVariable(name = "user_id", required = true) user_id: String): List<History> {
-        return historyService.getAllByUser(user_id)
+        return historyService.getAllByIdUser(user_id)
     }
 
     //on prend en compte aussi les 3 semaines dans le futur pour exclure les personnes qui se seraient proposées

@@ -25,7 +25,7 @@ class UtilService {
             throw IllegalArgumentException("Date format is not correct : dd/MM (day/month)")
         }
     }
-    fun localDatetoDate(localDate: LocalDate): Date {
+    fun localDateToDate(localDate: LocalDate): Date {
 
         return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant())
     }

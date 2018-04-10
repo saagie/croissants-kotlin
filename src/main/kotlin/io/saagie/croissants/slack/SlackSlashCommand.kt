@@ -1,7 +1,6 @@
 package io.saagie.croissants.slack
 
 import io.saagie.croissants.service.UserService
-import io.saagie.croissants.service.DrawService
 import io.saagie.croissants.service.HistoryService
 import io.saagie.croissants.service.UtilService
 import me.ramswaroop.jbot.core.slack.models.Attachment
@@ -22,7 +21,6 @@ class SlackSlashCommand(
         val userService: UserService,
         val historyService: HistoryService,
         val utilService: UtilService,
-        val drawService: DrawService,
         val slackBot: SlackBot
 ) {
 
@@ -210,14 +208,12 @@ class SlackSlashCommand(
         if (history != null) {
             val user = userService.get(history!!.emailUser!!)
             val date= history.dateCroissant
-            message.text += "Last selected person"
-            message.text += "*******************\n"
-            message.text += "*${ user.username} for ${date.date } \n\n"
+            message.text += "Next Selected is : *${ user.username}* for ${date.date } \n\n"
             message.text += "*******************\n"
 
         }else{
 
-            message.text += "No last selected person found"
+            message.text += "No next selected person found"
             message.text += "*******************\n"
         }
 
@@ -313,7 +309,7 @@ class SlackSlashCommand(
                              @RequestParam("response_url") responseUrl: String): Message {
 
         try {
-            val result = historyService.purpose(userId, drawService.getNextFriday())
+            val result = historyService.purpose(userId, utilService.getNextFriday())
             return if (result){
                 Message("You have purpose the croissant for the day (${text}) .")
             }else{

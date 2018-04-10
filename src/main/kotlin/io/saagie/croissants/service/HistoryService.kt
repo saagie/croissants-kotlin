@@ -37,7 +37,7 @@ class HistoryService(
 
     fun getLastSelected(): History? {
 
-        return historyDao.findAll().filter { it.dateCroissant > Date.from(Instant.now()) && it.dateCroissant < Date.from(Instant.now().plus(3, ChronoUnit.DAYS)) }.firstOrNull()
+        return historyDao.findAll().filter { it.dateCroissant > Date.from(Instant.now()) && it.dateCroissant < utilService.localDateToDate(utilService.getNextFriday()) }.firstOrNull()
     }
 
     fun acceptSelection(userId: String): Boolean {
@@ -58,7 +58,7 @@ class HistoryService(
 
     fun purpose(userId: String, localdate: LocalDate): Boolean {
         val user = userDao.findOneById(userId)
-        save(History(dateCroissant =  utilService.localDatetoDate(localdate) , emailUser = user.email, ok = 1))
+        save(History(dateCroissant =  utilService.localDateToDate(localdate) , emailUser = user.email, ok = 1))
         return true
 
     }
