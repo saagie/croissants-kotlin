@@ -1,15 +1,38 @@
 package io.saagie.croissants.service
 
 import io.saagie.croissants.domain.User
-import io.saagie.croissants.service.UserService
-import org.springframework.web.bind.annotation.GetMapping
+import io.saagie.croissants.slack.SlackBot
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
 import java.util.*
 
 @RestController
-class DrawService(val userService: UserService) {
+class DrawService(val userService: UserService,
+                  val slackBot: SlackBot,
+                  val historyService: HistoryService,
+                  val utilService: UtilService) {
 
-    @GetMapping("/test_draw")
+    @Scheduled(cron = "0 0 8 * * WED")
+    fun scheduleSelection() {
+        val nextFriday = utilService.getNextFriday()
+        if (historyService.getByDate(utilService.localDateToDate(nextFriday)) == null) {
+            val userDraw = this.drawUser()
+            slackBot.sendDM(userDraw,announcementMessage(nextFriday))
+            slackBot.sendDM(userService.getByEmail("kevin@saagie.com"),announcementMessage(nextFriday,userDraw))
+        }
+    }
+
+    @Scheduled(cron = "0 0 1 * * *")
+    fun updateCoef() {
+        val history = historyService.getByDate(utilService.localDateToDate(LocalDate.now()))
+        if (history != null) {
+            var user = userService.getByEmail(history.emailUser as String)
+            user.coefficient=1
+            userService.save(user)
+        }
+    }
+
     fun drawUser(): User{
         val userList = userService.findUsersToDraw()
         var coef: Int
@@ -31,6 +54,15 @@ class DrawService(val userService: UserService) {
         return drawList[rand]
     }
 
+    fun announcementMessage(date: LocalDate): String {
+        var message = "You have been drawn to bring the croissants on ${date}"
 
+        return message
+    }
 
+    fun announcementMessage(date: LocalDate, user: User): String {
+        var message = "${user.username} have been drawn to bring the croissants on ${date}"
+
+        return message
+    }
 }

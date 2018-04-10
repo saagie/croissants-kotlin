@@ -71,6 +71,10 @@ class UserService(
         return userDao.findByEnable(true)
     }
 
+    fun getByEmail(email: String): User {
+        return userDao.findOneByEmail(email)
+    }
+
     fun changeStatus(id: String) {
         val user = get(id)
         user.enable = !user.enable
@@ -100,7 +104,7 @@ class UserService(
 
     fun delete(userId: String) = userDao.delete(userId)
 
-    //return all the users without the ones draw during the last 3 weeks
+    //return all the users without the ones draw during the last 3 weeks and the next 3 weeks
     fun findUsersToDraw(): List<User> {
         val history = historyController.getAllHistoryOfLast3Weeks()
         val userId: MutableList<String?> = mutableListOf()
