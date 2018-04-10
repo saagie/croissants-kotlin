@@ -14,8 +14,10 @@ import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.math.BigDecimal
+import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 
@@ -67,9 +69,6 @@ class SlackSlashCommand(
                     setText("/c-top-ten : to see top ten highest coefficient")
                 },
                 Attachment().apply {
-                    setText("/c-propose-next : to purpose the croissant for next friday")
-                },
-                Attachment().apply {
                     setText("/c-inactive-profile : to disable your Croissants profile during holiday")
                 },
                 Attachment().apply {
@@ -83,6 +82,12 @@ class SlackSlashCommand(
                 },
                 Attachment().apply {
                     setText("/c-propose dd/MM : to purpose the croissant  for the specified date (day/month)")
+                },
+                Attachment().apply {
+                    setText("/c-propose-next : to purpose the croissant for next friday")
+                },
+                Attachment().apply {
+                    setText("/c-remove-propose : to remove purpose the croissant")
                 }
         )
         richMessage.attachments = attachments
@@ -373,6 +378,43 @@ class SlackSlashCommand(
         }
 
     }
+
+    @RequestMapping(value = ["/slack/remove-purpose"],
+            method = [(RequestMethod.POST)],
+            consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
+    fun onReceiveRemovePurposeCommand(@RequestParam("token") token: String,
+                                @RequestParam("team_id") teamId: String,
+                                @RequestParam("team_domain") teamDomain: String,
+                                @RequestParam("channel_id") channelId: String,
+                                @RequestParam("channel_name") channelName: String,
+                                @RequestParam("user_id") userId: String,
+                                @RequestParam("user_name") userName: String,
+                                @RequestParam("command") command: String,
+                                @RequestParam("text") text: String,
+                                @RequestParam("response_url") responseUrl: String): Message {
+
+
+
+        val date = utilService.extractDate(text)
+        return  if ( Date.from(Instant.now()) > utilService.localDateToDate(date.minus(2, ChronoUnit.DAYS))   )
+        {
+              Message("It's too late for remove proposition. Try to find someone for replace you.")
+
+        }else {
+            val history = historyService.getByDate(utilService.localDateToDate(date)).filter { it.ok != 2 }.firstOrNull()
+             if (history != null) {
+                historyService.delete(history)
+                Message("Your purpose has been removed (${text}).")
+
+
+            } else {
+                Message("You don't have purpose this day (${text}).")
+
+            }
+        }
+
+    }
+
 
 
     @RequestMapping(value = ["/slack/top-ten"],

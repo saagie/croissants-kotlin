@@ -65,4 +65,7 @@ class HistoryService(
     fun save(history: History) {
         historyDao.save(history)
     }
+    fun delete(history: History) {
+        historyDao.delete(history)
+    }
 }
