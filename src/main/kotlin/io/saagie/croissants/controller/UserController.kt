@@ -28,7 +28,6 @@ class UserController(val userService: UserService)  : SecurityController {
     }
 
 
-    @GetMapping("/test-users")
     fun test(): List<User>{
         return userService.findUsersToDraw()
 

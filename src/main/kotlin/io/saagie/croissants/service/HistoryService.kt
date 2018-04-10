@@ -40,6 +40,10 @@ class HistoryService(
         return historyDao.findAll().filter { it.dateCroissant > Date.from(Instant.now()) && it.dateCroissant < utilService.localDateToDate(utilService.getNextFriday()) }.firstOrNull()
     }
 
+    fun getByDate(date: Date): History {
+        return historyDao.findByDateCroissant(date)
+    }
+
     fun acceptSelection(userId: String): Boolean {
         var history = getAllByIdUser(userId).filter { it.dateCroissant > Date.from(Instant.now()) && it.dateCroissant < Date.from(Instant.now().plus(3, ChronoUnit.DAYS)) }
        if (history.isEmpty()) return false
