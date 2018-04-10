@@ -16,13 +16,13 @@ class UtilService {
         val now = LocalDate.now()
 
         try {
-            val date = LocalDate.parse(text , DateTimeFormatter.ofPattern("dd/MM/yy"))
+            val date = LocalDate.parse(text , DateTimeFormatter.ofPattern("dd/MM/uu"))
             if (now.isAfter(date)) {
                 throw IllegalArgumentException("Date can't be before today")
             }
             return date
         } catch (e: DateTimeParseException) {
-            throw IllegalArgumentException("Date format is not correct : dd/MM (day/month)")
+            throw IllegalArgumentException("Date format is not correct : dd/MM/YY (day/month/year)")
         }
     }
     fun localDateToDate(localDate: LocalDate): Date {

@@ -22,16 +22,16 @@
 
 |          Fonction          | Fait | En cours | Non |
 |:--------------------------:|:----:|:--------:|:---:|
-| Ajout d'utilisateur        |      |          |  X  |
+| Ajout d'utilisateur        |  X   |          |     |
 | Suppression d'utilisateur  |      |          |  X  |
-| Coefficient                |      |          |  X  |
-| Page Piège                 |      |          |  X  |
+| Coefficient                |  X   |          |  X  |
+| Page Piège                 |  X   |          |  X  |
 | Liste utilisateur          |      |          |  X  |
 | Choix Utilisateur          |      |          |  X  |
-| Ajout dans l'historique    |      |          |  X  |
-| Max une fois/3 semaines    |      |          |  X  |
-| Synchro Google/slack       |      |          |  X  |
-| Page Joker/Acceptation     |      |          |  X  |
+| Ajout dans l'historique    |  X   |          |  X  |
+| Max une fois/3 semaines    |  X   |          |  X  |
+| Synchro Google/slack       |  X   |          |  X  |
+| Page Joker/Acceptation     |  X   |          |  X  |
 | Reset Joker                |      |          |  X  |
 | Accepter d'office          |      |          |  X  |
 | Envoi mail                 |      |          |  X  |

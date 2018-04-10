@@ -50,8 +50,8 @@ class DrawService(val userService: UserService,
 
         if (userList.isEmpty())
         {
+            slackBot.sendDM(userService.getByEmail(opsEmail),"Not user found for draw Croissants !")
             throw  IllegalStateException("There is no user to draw")
-            slackBot.sendDM(userService.getByEmail(opsEmail),"Not user found for drawn Croissants !")
         }
 
         userList.forEach {

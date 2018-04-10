@@ -32,11 +32,11 @@ class HistoryService(
 
 
     fun getLastSelected(): History? {
-        return historyDao.findAll().filter { it.dateCroissant > Date.from(Instant.now()) && it.dateCroissant <= utilService.localDateToDate(utilService.getNextFriday()) }.firstOrNull()
+        return historyDao.findAll().filter { it.dateCroissant > Date.from(Instant.now()) && it.dateCroissant <= utilService.localDateToDate(utilService.getNextFriday()) && it.ok == 1 }.firstOrNull()
     }
 
     fun getNextSelected(): List<History?> {
-        return historyDao.findAll().filter { it.dateCroissant > Date.from(Instant.now()) && it.ok == 1}
+        return historyDao.findAll().filter { it.dateCroissant > Date.from(Instant.now()) && it.ok == 1}.sortedBy { it.dateCroissant }
     }
 
     fun getByDate(date: Date): List<History> {
@@ -55,9 +55,11 @@ class HistoryService(
 
     fun purpose(userId: String, localdate: LocalDate): Boolean {
         val user = userDao.findOneById(userId)
-        save(History(dateCroissant = utilService.localDateToDate(localdate), emailUser = user.email, ok = 1))
-        return true
-
+        if (historyDao.findByDateCroissant(utilService.localDateToDate(localdate)).filter { it.ok !=2 }.isEmpty()){
+            save(History(dateCroissant = utilService.localDateToDate(localdate), emailUser = user.email, ok = 1))
+            return true
+        }
+        return false
     }
 
     fun save(history: History) {

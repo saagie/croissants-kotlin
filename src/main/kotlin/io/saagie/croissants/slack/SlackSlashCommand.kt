@@ -55,6 +55,9 @@ class SlackSlashCommand(
                     setText("/c-selected : to display selected for the next friday")
                 },
                 Attachment().apply {
+                    setText("/c-selected-next : to display all next selected")
+                },
+                Attachment().apply {
                     setText("/c-trap : to trap a unlock workstation")
                 },
                 Attachment().apply {
@@ -155,7 +158,7 @@ class SlackSlashCommand(
             val weightedCoefficient = userService.getWeightedCoefficient(user)
             val draw = historyService.getAllByEmailUser(user.email!!).size
             val totalCoef = userService.getAllActive().sumBy { userService.getWeightedCoefficient(it) }
-            val chance:Double= ((weightedCoefficient / totalCoef.toDouble())*100)
+            val chance: Double = ((weightedCoefficient / totalCoef.toDouble()) * 100)
             val richMessage = RichMessage("Profile : ${user.username}")
 
             val attachments = arrayOf(
@@ -178,7 +181,7 @@ class SlackSlashCommand(
                         setText("Status :  ${user.status()}")
                     },
                     Attachment().apply {
-                        setText("Chance of being selected :  ${ BigDecimal(chance).setScale(2, BigDecimal.ROUND_HALF_UP).toDouble() }%")
+                        setText("Chance of being selected :  ${BigDecimal(chance).setScale(2, BigDecimal.ROUND_HALF_UP).toDouble()}%")
                     }
             )
             richMessage.attachments = attachments
@@ -195,26 +198,26 @@ class SlackSlashCommand(
             method = [(RequestMethod.POST)],
             consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
     fun onReceiveSelectedCommand(@RequestParam("token") token: String,
-                                    @RequestParam("team_id") teamId: String,
-                                    @RequestParam("team_domain") teamDomain: String,
-                                    @RequestParam("channel_id") channelId: String,
-                                    @RequestParam("channel_name") channelName: String,
-                                    @RequestParam("user_id") userId: String,
-                                    @RequestParam("user_name") userName: String,
-                                    @RequestParam("command") command: String,
-                                    @RequestParam("text") text: String,
-                                    @RequestParam("response_url") responseUrl: String): Message {
+                                 @RequestParam("team_id") teamId: String,
+                                 @RequestParam("team_domain") teamDomain: String,
+                                 @RequestParam("channel_id") channelId: String,
+                                 @RequestParam("channel_name") channelName: String,
+                                 @RequestParam("user_id") userId: String,
+                                 @RequestParam("user_name") userName: String,
+                                 @RequestParam("command") command: String,
+                                 @RequestParam("text") text: String,
+                                 @RequestParam("response_url") responseUrl: String): Message {
 
         val history = historyService.getLastSelected()
 
         var message = Message("*******************\n")
         if (history != null) {
             val user = userService.getByEmail(history!!.emailUser!!)
-            val date= history.dateCroissant
-            message.text += "Next Selected is : *${ user.username}* for ${ date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().format(DateTimeFormatter.ofPattern("dd/MM/YY")) }  \n\n"
+            val date = history.dateCroissant
+            message.text += "Next Selected is : *${user.username}* for ${date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().format(DateTimeFormatter.ofPattern("dd/MM/YY"))}  \n\n"
             message.text += "*******************\n"
 
-        }else{
+        } else {
 
             message.text += "No next selected person found\n"
             message.text += "*******************\n"
@@ -228,31 +231,31 @@ class SlackSlashCommand(
             method = [(RequestMethod.POST)],
             consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
     fun onReceiveSelectedNextCommand(@RequestParam("token") token: String,
-                                    @RequestParam("team_id") teamId: String,
-                                    @RequestParam("team_domain") teamDomain: String,
-                                    @RequestParam("channel_id") channelId: String,
-                                    @RequestParam("channel_name") channelName: String,
-                                    @RequestParam("user_id") userId: String,
-                                    @RequestParam("user_name") userName: String,
-                                    @RequestParam("command") command: String,
-                                    @RequestParam("text") text: String,
-                                    @RequestParam("response_url") responseUrl: String): Message {
+                                     @RequestParam("team_id") teamId: String,
+                                     @RequestParam("team_domain") teamDomain: String,
+                                     @RequestParam("channel_id") channelId: String,
+                                     @RequestParam("channel_name") channelName: String,
+                                     @RequestParam("user_id") userId: String,
+                                     @RequestParam("user_name") userName: String,
+                                     @RequestParam("command") command: String,
+                                     @RequestParam("text") text: String,
+                                     @RequestParam("response_url") responseUrl: String): Message {
 
         val history = historyService.getNextSelected()
 
         var message = Message("*******************\n")
 
-        if (history.isEmpty())
-        {
+        if (history.isEmpty()) {
             message.text += "No next selected person found\n"
             message.text += "*******************\n"
-        }else{
+        } else {
+            message.text += "Next Selected is : \n"
             history.forEach {
                 val user = userService.getByEmail(it!!.emailUser!!)
-                val date= it.dateCroissant
-                message.text += "Next Selected is : *${ user.username}* for ${ date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().format(DateTimeFormatter.ofPattern("dd/MM/YY")) }  \n\n"
-                message.text += "*******************\n"
+                val date = it.dateCroissant
+                message.text += "- *${user.username}* for ${date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().format(DateTimeFormatter.ofPattern("dd/MM/YY"))}  \n\n"
             }
+            message.text += "*******************\n"
         }
 
         return message
@@ -275,7 +278,7 @@ class SlackSlashCommand(
 
 
         val message = Message("OK, your selection are accepted.")
-        if (! drawService.acceptSelection(userId)) {
+        if (!drawService.acceptSelection(userId)) {
             message.text = "You have no selection or have already accept or decline for the next friday."
         }
 
@@ -297,9 +300,8 @@ class SlackSlashCommand(
                                 @RequestParam("response_url") responseUrl: String): Message {
 
 
-
         val message = Message("You've declined your selection")
-        if (! drawService.declineSelection(userId)) {
+        if (!drawService.declineSelection(userId)) {
             message.text = "You have no selection or have already accept or decline for the next friday."
         }
         return message
@@ -309,50 +311,62 @@ class SlackSlashCommand(
             method = [(RequestMethod.POST)],
             consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
     fun onReceivePurposeCommand(@RequestParam("token") token: String,
-                             @RequestParam("team_id") teamId: String,
-                             @RequestParam("team_domain") teamDomain: String,
-                             @RequestParam("channel_id") channelId: String,
-                             @RequestParam("channel_name") channelName: String,
-                             @RequestParam("user_id") userId: String,
-                             @RequestParam("user_name") userName: String,
-                             @RequestParam("command") command: String,
-                             @RequestParam("text") text: String,
-                             @RequestParam("response_url") responseUrl: String): Message {
+                                @RequestParam("team_id") teamId: String,
+                                @RequestParam("team_domain") teamDomain: String,
+                                @RequestParam("channel_id") channelId: String,
+                                @RequestParam("channel_name") channelName: String,
+                                @RequestParam("user_id") userId: String,
+                                @RequestParam("user_name") userName: String,
+                                @RequestParam("command") command: String,
+                                @RequestParam("text") text: String,
+                                @RequestParam("response_url") responseUrl: String): Message {
+
 
         try {
             val result = historyService.purpose(userId, utilService.extractDate(text))
-            val message = if (result){
+            return if (result) {
                 Message("You have purpose the croissant for the day (${text}) .")
-            }else{
-                Message("Someone already purpose the croissant for the day (${text}) .")
+            } else {
+                val history = historyService.getByDate(utilService.localDateToDate(utilService.extractDate(text))).filter { it.ok != 2 }.firstOrNull()
+                if (history != null) {
+                    val user = userService.getByEmail(history!!.emailUser!!)
+                    Message("${user.username} already purpose the croissant for the day (${text}) .")
+                } else {
+                    Message("Somebody already purpose the croissant for the day (${text}) .")
+                }
             }
-            return message
         } catch (iae: IllegalArgumentException) {
             return Message(iae.message)
         }
-
     }
 
     @RequestMapping(value = ["/slack/purpose-next"],
             method = [(RequestMethod.POST)],
             consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
     fun onReceivePurposeNextCommand(@RequestParam("token") token: String,
-                             @RequestParam("team_id") teamId: String,
-                             @RequestParam("team_domain") teamDomain: String,
-                             @RequestParam("channel_id") channelId: String,
-                             @RequestParam("channel_name") channelName: String,
-                             @RequestParam("user_id") userId: String,
-                             @RequestParam("user_name") userName: String,
-                             @RequestParam("command") command: String,
-                             @RequestParam("text") text: String,
-                             @RequestParam("response_url") responseUrl: String): Message {
+                                    @RequestParam("team_id") teamId: String,
+                                    @RequestParam("team_domain") teamDomain: String,
+                                    @RequestParam("channel_id") channelId: String,
+                                    @RequestParam("channel_name") channelName: String,
+                                    @RequestParam("user_id") userId: String,
+                                    @RequestParam("user_name") userName: String,
+                                    @RequestParam("command") command: String,
+                                    @RequestParam("text") text: String,
+                                    @RequestParam("response_url") responseUrl: String): Message {
 
         try {
-            val result = historyService.purpose(userId, utilService.getNextFriday())
-            return if (result){
-                Message("You have purpose the croissant for the day (${text}) .")
-            }else{
-                Message("Someone already purpose the croissant for the day (${text}) .")
+            val date = utilService.getNextFriday()
+            val result = historyService.purpose(userId, date)
+            return if (result) {
+                Message("You have purpose the croissant for the day (${date.format(DateTimeFormatter.ofPattern("dd/MM/YY"))}) .")
+            } else {
+                val history = historyService.getByDate(utilService.localDateToDate(date)).filter { it.ok != 2 }.firstOrNull()
+                if (history != null) {
+                    val user = userService.getByEmail(history!!.emailUser!!)
+                    Message("${user.username} already purpose the croissant for the day (${date.format(DateTimeFormatter.ofPattern("dd/MM/YY"))})  .")
+                } else {
+                    Message("Somebody already purpose the croissant for the day (${date.format(DateTimeFormatter.ofPattern("dd/MM/YY"))})  .")
+                }
             }
         } catch (iae: IllegalArgumentException) {
             return Message(iae.message)
@@ -365,39 +379,6 @@ class SlackSlashCommand(
             method = [(RequestMethod.POST)],
             consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
     fun onReceiveToptenCommand(@RequestParam("token") token: String,
-                              @RequestParam("team_id") teamId: String,
-                              @RequestParam("team_domain") teamDomain: String,
-                              @RequestParam("channel_id") channelId: String,
-                              @RequestParam("channel_name") channelName: String,
-                              @RequestParam("user_id") userId: String,
-                              @RequestParam("user_name") userName: String,
-                              @RequestParam("command") command: String,
-                              @RequestParam("text") text: String,
-                              @RequestParam("response_url") responseUrl: String): Message {
-
-
-        var users = userService.getAll().sortedByDescending { userService.getWeightedCoefficient(it) }
-
-        val message = Message("*******************\n")
-        message.text += "*Top Ten*\n\n"
-        val nkeep = 10
-        var i = nkeep
-        users = users.take(nkeep)
-        users.map({  message.text += "${ nkeep+1 - i-- }. ${ it.username } : ${ userService.getWeightedCoefficient(it)  } \n"})
-
-
-        message.text += "*******************\n"
-
-
-        return message
-    }
-
-
-
-    @RequestMapping(value = ["/slack/top"],
-            method = [(RequestMethod.POST)],
-            consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
-    fun onReceiveTopCommand(@RequestParam("token") token: String,
                                @RequestParam("team_id") teamId: String,
                                @RequestParam("team_domain") teamDomain: String,
                                @RequestParam("channel_id") channelId: String,
@@ -412,10 +393,54 @@ class SlackSlashCommand(
         var users = userService.getAll().sortedByDescending { userService.getWeightedCoefficient(it) }
 
         val message = Message("*******************\n")
+        message.text += "*Top Ten*\n\n"
+        val nkeep = 10
+        var i = nkeep
+        users = users.take(nkeep)
+        users.map({
+            message.text += "${nkeep + 1 - i--}. ${it.username} : ${userService.getWeightedCoefficient(it)}  ${if (!it.enable) {
+                "_inactive_"
+            } else {
+                ""
+            }} \n"
+        })
+
+
+        message.text += "*******************\n"
+
+
+        return message
+    }
+
+
+    @RequestMapping(value = ["/slack/top"],
+            method = [(RequestMethod.POST)],
+            consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
+    fun onReceiveTopCommand(@RequestParam("token") token: String,
+                            @RequestParam("team_id") teamId: String,
+                            @RequestParam("team_domain") teamDomain: String,
+                            @RequestParam("channel_id") channelId: String,
+                            @RequestParam("channel_name") channelName: String,
+                            @RequestParam("user_id") userId: String,
+                            @RequestParam("user_name") userName: String,
+                            @RequestParam("command") command: String,
+                            @RequestParam("text") text: String,
+                            @RequestParam("response_url") responseUrl: String): Message {
+
+
+        var users = userService.getAll().sortedByDescending { userService.getWeightedCoefficient(it) }
+
+        val message = Message("*******************\n")
         message.text += "*Top*\n\n"
-        val lsize= users.size
+        val lsize = users.size
         var i = lsize
-        users.map({  message.text += "${ lsize+1 - i-- }. ${ it.username } : ${ userService.getWeightedCoefficient(it)  } \n"})
+        users.map({
+            message.text += "${lsize + 1 - i--}. ${it.username} : ${userService.getWeightedCoefficient(it)}   ${if (!it.enable) {
+                "_inactive_"
+            } else {
+                ""
+            }}\n"
+        })
         message.text += "*******************\n"
 
 
@@ -426,15 +451,15 @@ class SlackSlashCommand(
             method = [(RequestMethod.POST)],
             consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
     fun onReceiveRandomCommand(@RequestParam("token") token: String,
-                                 @RequestParam("team_id") teamId: String,
-                                 @RequestParam("team_domain") teamDomain: String,
-                                 @RequestParam("channel_id") channelId: String,
-                                 @RequestParam("channel_name") channelName: String,
-                                 @RequestParam("user_id") userId: String,
-                                 @RequestParam("user_name") userName: String,
-                                 @RequestParam("command") command: String,
-                                 @RequestParam("text") text: String,
-                                 @RequestParam("response_url") responseUrl: String): Message {
+                               @RequestParam("team_id") teamId: String,
+                               @RequestParam("team_domain") teamDomain: String,
+                               @RequestParam("channel_id") channelId: String,
+                               @RequestParam("channel_name") channelName: String,
+                               @RequestParam("user_id") userId: String,
+                               @RequestParam("user_name") userName: String,
+                               @RequestParam("command") command: String,
+                               @RequestParam("text") text: String,
+                               @RequestParam("response_url") responseUrl: String): Message {
 
 
         val fact = arrayOf(
@@ -447,21 +472,22 @@ class SlackSlashCommand(
                 "As this app doesn't be tested by Sandrine, we expect many bugs*"
         )
 
-        return  Message("* ${ fact[Random().nextInt(fact.size)] }\n\n")
+        return Message("* ${fact[Random().nextInt(fact.size)]}\n\n")
     }
+
     @RequestMapping(value = ["/slack/trap"],
             method = [(RequestMethod.POST)],
             consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
     fun onReceiveTrapCommand(@RequestParam("token") token: String,
-                               @RequestParam("team_id") teamId: String,
-                               @RequestParam("team_domain") teamDomain: String,
-                               @RequestParam("channel_id") channelId: String,
-                               @RequestParam("channel_name") channelName: String,
-                               @RequestParam("user_id") userId: String,
-                               @RequestParam("user_name") userName: String,
-                               @RequestParam("command") command: String,
-                               @RequestParam("text") text: String,
-                               @RequestParam("response_url") responseUrl: String): Message {
+                             @RequestParam("team_id") teamId: String,
+                             @RequestParam("team_domain") teamDomain: String,
+                             @RequestParam("channel_id") channelId: String,
+                             @RequestParam("channel_name") channelName: String,
+                             @RequestParam("user_id") userId: String,
+                             @RequestParam("user_name") userName: String,
+                             @RequestParam("command") command: String,
+                             @RequestParam("text") text: String,
+                             @RequestParam("response_url") responseUrl: String): Message {
 
         userService.save(userService.get(userId).incrementCoefficient(10))
 
