@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.math.BigDecimal
+import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -60,7 +61,7 @@ class SlackSlashCommand(
                     setText("/c-selected-next : to display all next selected")
                 },
                 Attachment().apply {
-                    setText("/c-trap : to trap a unlock workstation")
+                    setText("/c-trap email : to trap a unlock workstation")
                 },
                 Attachment().apply {
                     setText("/c-top : to see all coefficient")
@@ -476,8 +477,9 @@ class SlackSlashCommand(
         message.text += "*Top*\n\n"
         val lsize = users.size
         var i = lsize
+        val allCoefficient = users.sumBy { userService.getWeightedCoefficient(it) }
         users.map({
-            message.text += "${lsize + 1 - i--}. ${it.username} : ${userService.getWeightedCoefficient(it)}   ${if (!it.enable) {
+            message.text += "${lsize + 1 - i--}. ${it.username} : ${userService.getWeightedCoefficient(it)}  ${BigDecimal(((userService.getWeightedCoefficient(it)  / allCoefficient.toDouble()) * 100)).setScale(2, BigDecimal.ROUND_HALF_UP).toDouble()   }%   ${if (!it.enable) {
                 "_inactive_"
             } else {
                 ""
@@ -531,12 +533,37 @@ class SlackSlashCommand(
                              @RequestParam("text") text: String,
                              @RequestParam("response_url") responseUrl: String): Message {
 
-        userService.save(userService.get(userId).incrementCoefficient(10))
+        var user = userService.get(userId)
+        var trapAuthor = ""
+        if (text != "")
+        {
+           var trap = userService.getByEmail(text)
+            trap.incrementCoefficient(-5)
+            userService.save(trap)
+            trapAuthor = "You have been trapped by " + trap.username +"\n\n"
+        }
 
-        val message = Message("*******************\n")
-        message.text += ":flic: *Un default de sécurisation à été répéré* \n\n"
-        message.text += "+10 point au croissant !* \n\n"
-        message.text += "*******************\n"
-        return message
+
+        return if (user.lastUp == null || Duration.between(
+                        user.lastUp!!.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime(),
+                        Date.from(Instant.now()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+                ).toMinutes() >= 20) {
+
+            user.incrementCoefficient(10)
+            user.lastUp = Date.from(Instant.now())
+            userService.save(user)
+            Message( "*******************\n"+
+             " *A default of security has been detected* \n\n"+
+             "Your coefficient increases by 10 points !\n\n"+
+                    trapAuthor +
+             "*******************\n")
+
+        }else{
+            Message("*******************\n"+
+                    " *This person has already been trapped in the last 20 minutes* \n\n"+
+                    "*******************\n")
+        }
+
+
     }
 }
