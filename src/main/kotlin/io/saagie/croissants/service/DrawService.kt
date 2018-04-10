@@ -1,5 +1,6 @@
 package io.saagie.croissants.service
 
+import io.saagie.croissants.domain.History
 import io.saagie.croissants.domain.User
 import io.saagie.croissants.slack.SlackBot
 import org.springframework.scheduling.annotation.Scheduled
@@ -18,6 +19,7 @@ class DrawService(val userService: UserService,
         val nextFriday = utilService.getNextFriday()
         if (historyService.getByDate(utilService.localDateToDate(nextFriday)) == null) {
             val userDraw = this.drawUser()
+            historyService.save(History(emailUser = userDraw.email, dateCroissant = utilService.localDateToDate(nextFriday)))
             slackBot.sendDM(userDraw,announcementMessage(nextFriday))
             slackBot.sendDM(userService.getByEmail("kevin@saagie.com"),announcementMessage(nextFriday,userDraw))
         }
@@ -41,7 +43,6 @@ class DrawService(val userService: UserService,
 
         userList.forEach {
             coef = userService.getWeightedCoefficient(it)
-            println("coef : ${coef}")
             for (i in 1..coef){
                 drawList.add(it)
             }

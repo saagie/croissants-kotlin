@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.math.BigDecimal
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 
@@ -206,14 +209,14 @@ class SlackSlashCommand(
 
         var message = Message("*******************\n")
         if (history != null) {
-            val user = userService.get(history!!.emailUser!!)
+            val user = userService.getByEmail(history!!.emailUser!!)
             val date= history.dateCroissant
-            message.text += "Next Selected is : *${ user.username}* for ${date.date } \n\n"
+            message.text += "Next Selected is : *${ user.username}* for ${ date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().format(DateTimeFormatter.ofPattern("dd/MM/YY")) }  \n\n"
             message.text += "*******************\n"
 
         }else{
 
-            message.text += "No next selected person found"
+            message.text += "No next selected person found\n"
             message.text += "*******************\n"
         }
 
@@ -239,7 +242,7 @@ class SlackSlashCommand(
 
         val message = Message("OK, your selection are accepted.")
         if (! historyService.acceptSelection(userId)) {
-            message.text = "You have no selection for the next friday."
+            message.text = "You have no selection or have already accept or decline for the next friday."
         }
 
         return message
@@ -260,9 +263,11 @@ class SlackSlashCommand(
                                 @RequestParam("response_url") responseUrl: String): Message {
 
 
-        historyService.declineSelection(userId)
 
         val message = Message("You've declined your selection")
+        if (! historyService.declineSelection(userId)) {
+            message.text = "You have no selection or have already accept or decline for the next friday."
+        }
         return message
     }
 

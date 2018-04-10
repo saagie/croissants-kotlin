@@ -1,19 +1,16 @@
 package io.saagie.croissants.service
 
-import io.saagie.croissants.controller.HistoryController
 import io.saagie.croissants.dao.UserDao
 
 
 import io.saagie.croissants.domain.User
 import org.springframework.stereotype.Service
-import io.saagie.croissants.service.HistoryService
 
 @Service
 class UserService(
         val userDao: UserDao,
         val emailService: EmailService,
-        val historyService: HistoryService,
-        val historyController: HistoryController
+        val historyService: HistoryService
 
 ) {
 
@@ -106,9 +103,9 @@ class UserService(
 
     //return all the users without the ones draw during the last 3 weeks and the next 3 weeks
     fun findUsersToDraw(): List<User> {
-        val history = historyController.getAllHistoryOfLast3Weeks()
+        val history = historyService.getAllHistoryOfLast3Weeks()
         val userId: MutableList<String?> = mutableListOf()
-        var listUsers = userDao.findAll()
+        var listUsers = userDao.findByEnable(true)
         var userList: MutableList<User> = mutableListOf()
 
         history.forEach {

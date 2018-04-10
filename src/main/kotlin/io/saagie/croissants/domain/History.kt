@@ -3,11 +3,14 @@ package io.saagie.croissants.domain
 import java.time.Instant
 import java.util.*
 import javax.persistence.Entity
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
 import javax.persistence.Id
 
 @Entity
 data class History(
-        @Id
+
+        @Id @GeneratedValue(strategy= GenerationType.AUTO)
         val id: String? = null,
         val dateCroissant: Date = Date.from(Instant.now()),
         val emailUser: String? = null,
@@ -23,7 +26,7 @@ data class History(
                 return this
         }
         fun setRefused(): History{
-                this.ok=1
+                this.ok=2
                 return this
 
         }

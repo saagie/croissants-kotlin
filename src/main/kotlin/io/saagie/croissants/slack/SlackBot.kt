@@ -60,9 +60,10 @@ class SlackBot : Bot() {
         val message = Message("*******************\n")
         message.text += ":game_die: Draw is done for the ${date.format(DateTimeFormatter.ofPattern("dd/MM"))} the person selected is :  ${ user.username } \n"
         message.text += "*******************"
+
         val restTemplate = RestTemplate()
         try {
-            restTemplate.postForEntity<String>(slackWebhookUrl, message, String::class.java)
+            val result = restTemplate.postForEntity<String>(slackWebhookUrl, message, String::class.java)
         } catch (e: RestClientException) {
             logger.error("Error posting to Slack Incoming Webhook: ", e)
         }
