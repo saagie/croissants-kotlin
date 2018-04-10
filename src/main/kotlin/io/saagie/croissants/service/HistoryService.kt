@@ -44,8 +44,8 @@ class HistoryService(
     //on exclut également des retirages de la semaine les personnes ayant déjà décliné
     fun getAllExcludedHistory(): List<History> {
         return getAll().filter {
-            (it.dateCroissant > Date.from(Instant.now().minus(21, ChronoUnit.DAYS)) && it.dateCroissant < Date.from(Instant.now().plus(21, ChronoUnit.DAYS)) && it.ok == 1 )
-                    && ( it.dateCroissant > Date.from(Instant.now()) && it.dateCroissant < Date.from(Instant.now().plus(4, ChronoUnit.DAYS)) && it.ok == 2 )  }
+            (it.dateCroissant > Date.from(Instant.now().minus(21, ChronoUnit.DAYS)) && it.dateCroissant < Date.from(Instant.now().plus(21, ChronoUnit.DAYS)) && it.ok == 1 ) || ( it.dateCroissant > Date.from(Instant.now()) && it.dateCroissant <= utilService.localDateToDate(utilService.getNextFriday()) && it.ok == 2 ) }
+
     }
 
 

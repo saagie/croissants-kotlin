@@ -7,6 +7,7 @@ logging:
     me.ramswaroop.jbot: WARN
 ## GENERAL
 url: ${CROISSANTS_URL}
+opsEmail: ${CROISSANTS_OPS_MAIL}
 # SLACK BOT
 slackBotToken: ${CROISSANTS_SLACKBOT_TOKEN}
 slackWebhookUrl: ${CROISSANTS_SLACK_WEBHOOK_URL}
@@ -34,9 +35,9 @@ spring:
               timeout: 5000
               writetimeout: 5000
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/croissants
-    username: root
-    password: root
+    url: ${CROISSANTS_MYSQL_URI}
+    username: ${CROISSANTS_MYSQL_USER}
+    password: ${CROISSANTS_MYSQL_PASS}
   jpa:
     hibernate:
       ddl-auto: update

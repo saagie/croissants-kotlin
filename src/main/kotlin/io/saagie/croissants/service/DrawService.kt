@@ -3,6 +3,7 @@ package io.saagie.croissants.service
 import io.saagie.croissants.domain.History
 import io.saagie.croissants.domain.User
 import io.saagie.croissants.slack.SlackBot
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.web.bind.annotation.RestController
 import java.time.Instant
@@ -16,6 +17,9 @@ class DrawService(val userService: UserService,
                   val historyService: HistoryService,
                   val utilService: UtilService) {
 
+    @Value("\${opsEmail}")
+    private val opsEmail: String = ""
+
     @Scheduled(cron = "0 0 8 * * WED")
     fun scheduleSelection() {
         val nextFriday = utilService.getNextFriday()
@@ -25,7 +29,7 @@ class DrawService(val userService: UserService,
             val userDraw = this.drawUser()
             historyService.save(History(emailUser = userDraw.email, dateCroissant = utilService.localDateToDate(nextFriday)))
             slackBot.sendDM(userDraw,announcementMessage(nextFriday))
-            slackBot.sendDM(userService.getByEmail("kevin@saagie.com"),announcementMessage(nextFriday,userDraw))
+            slackBot.sendDM(userService.getByEmail(opsEmail),announcementMessage(nextFriday,userDraw))
         }
     }
 
@@ -38,12 +42,17 @@ class DrawService(val userService: UserService,
             userService.save(user)
         }
     }
-
     fun drawUser(): User{
         val userList = userService.findUsersToDraw()
         var coef: Int
         var drawList: MutableList<User> = mutableListOf()
         var rand: Int
+
+        if (userList.isEmpty())
+        {
+            throw  IllegalStateException("There is no user to draw")
+            slackBot.sendDM(userService.getByEmail(opsEmail),"Not user found for drawn Croissants !")
+        }
 
         userList.forEach {
             coef = userService.getWeightedCoefficient(it)
