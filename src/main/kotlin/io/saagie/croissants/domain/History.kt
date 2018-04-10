@@ -18,7 +18,8 @@ data class History(
         // 0 = Waiting answer
         // 1 = Accepted
         // 2 = Refused
-        var ok: Int = 0
+        var ok: Int = 0,
+        var dateDraw: Date = Date.from(Instant.now())
 ){
 
         fun setAccepted(): History{

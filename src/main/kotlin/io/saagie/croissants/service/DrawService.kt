@@ -6,8 +6,10 @@ import io.saagie.croissants.slack.SlackBot
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.web.bind.annotation.RestController
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.util.*
 
@@ -27,7 +29,7 @@ class DrawService(val userService: UserService,
 
         if (doDraw){
             val userDraw = this.drawUser()
-            historyService.save(History(emailUser = userDraw.email, dateCroissant = utilService.localDateToDate(nextFriday)))
+            historyService.save(History(emailUser = userDraw.email, dateCroissant = utilService.localDateToDate(nextFriday),dateDraw = Date.from(Instant.now())))
             slackBot.sendDM(userDraw,announcementMessage(nextFriday))
             slackBot.sendDM(userService.getByEmail(opsEmail),announcementMessage(nextFriday,userDraw))
         }
@@ -37,11 +39,29 @@ class DrawService(val userService: UserService,
     fun updateCoef() {
         val history = historyService.getByDate(utilService.localDateToDate(LocalDate.now())).filter { it.ok == 1 } as History
         if (history != null) {
-            var user = userService.getByEmail(history.emailUser as String)
+            var user = userService.getByEmail(history.emailUser!!)
             user.coefficient=1
             userService.save(user)
         }
     }
+
+    @Scheduled(cron = "0 */30 * * * *")
+    fun autoDecline() {
+        val history = historyService.getByDrawDate(Date.from(Instant.now()))
+
+        if (history.isNotEmpty()){
+            history.forEach {
+                if (Duration.between(
+                        it.dateDraw.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime(),
+                        Date.from(Instant.now()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+                ).toHours() >= 2){
+                    slackBot.sendDM(userService.getByEmail(it.emailUser!!),"Your selection has been automatically declined because you didn't accept or decline it in the past 2 hours.")
+                    this.declineSelection(userService.getByEmail(it.emailUser!!).id)
+                }
+            }
+        }
+    }
+
     fun drawUser(): User{
         val userList = userService.findUsersToDraw()
         var coef: Int

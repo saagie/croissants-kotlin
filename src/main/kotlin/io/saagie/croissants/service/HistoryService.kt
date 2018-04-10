@@ -43,6 +43,10 @@ class HistoryService(
         return historyDao.findByDateCroissant(date).sortedBy { it.id }
     }
 
+    fun getByDrawDate(date: Date): List<History> {
+        return historyDao.findByDateCroissant(date).filter { it.ok == 0 && it.dateDraw < date}.sortedBy { it.id }
+    }
+
     //on prend en compte aussi les 3 semaines dans le futur pour exclure les personnes qui se seraient proposées
     // pour respecter la règle : "on ne peut être tiré au sort pour les croissants qu'une fois toutes les 3 semaines"
     //on exclut également des retirages de la semaine les personnes ayant déjà décliné
