@@ -13,7 +13,9 @@ class UserService(
         val historyService: HistoryService
 
 ) {
-
+    fun findOneById(userId: String):User{
+        return userDao.findOneById(userId)
+    }
     fun registerUser(username: String, id: String): Boolean {
         if (!userDao.exists(id)) {
             val allHistory = historyService.getAll()

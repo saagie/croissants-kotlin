@@ -2,6 +2,7 @@ package io.saagie.croissants.slack
 
 import io.saagie.croissants.service.UserService
 import io.saagie.croissants.service.HistoryService
+import io.saagie.croissants.service.DrawService
 import io.saagie.croissants.service.UtilService
 import me.ramswaroop.jbot.core.slack.models.Attachment
 import me.ramswaroop.jbot.core.slack.models.Message
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.math.BigDecimal
-import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -23,8 +23,8 @@ import java.util.*
 class SlackSlashCommand(
         val userService: UserService,
         val historyService: HistoryService,
-        val utilService: UtilService,
-        val slackBot: SlackBot
+        val drawService: DrawService,
+        val utilService: UtilService
 ) {
 
     @Value("\${url}")
@@ -241,7 +241,7 @@ class SlackSlashCommand(
 
 
         val message = Message("OK, your selection are accepted.")
-        if (! historyService.acceptSelection(userId)) {
+        if (! drawService.acceptSelection(userId)) {
             message.text = "You have no selection or have already accept or decline for the next friday."
         }
 
@@ -265,7 +265,7 @@ class SlackSlashCommand(
 
 
         val message = Message("You've declined your selection")
-        if (! historyService.declineSelection(userId)) {
+        if (! drawService.declineSelection(userId)) {
             message.text = "You have no selection or have already accept or decline for the next friday."
         }
         return message

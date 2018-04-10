@@ -5,7 +5,9 @@ import io.saagie.croissants.domain.User
 import io.saagie.croissants.slack.SlackBot
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.web.bind.annotation.RestController
+import java.time.Instant
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 @RestController
@@ -55,6 +57,25 @@ class DrawService(val userService: UserService,
         return drawList[rand]
     }
 
+    fun acceptSelection(userId: String): Boolean {
+        var history = historyService.getAllByEmailUser(userService.findOneById(userId).email!!).filter { it.dateCroissant > Date.from(Instant.now()) && it.dateCroissant < Date.from(Instant.now().plus(3, ChronoUnit.DAYS)) && it.ok == 0 }
+        if (history.isEmpty()) return false
+        historyService.save(history.first().setAccepted())
+        slackBot.selection(userService.findOneById(userId), utilService.getNextFriday())
+        return true
+    }
+
+    fun declineSelection(userId: String): Boolean {
+
+        var history = historyService.getAllByEmailUser(userService.findOneById(userId).email!!).filter { it.dateCroissant > Date.from(Instant.now()) && it.dateCroissant < Date.from(Instant.now().plus(3, ChronoUnit.DAYS)) && it.ok == 0 }
+        if (history.isEmpty()) return false
+        historyService.save(history.first().setRefused())
+        userService.save(userService.findOneById(userId).incrementCoefficient(20))
+        //TODO uncomment
+        scheduleSelection()
+        return true
+
+    }
     fun announcementMessage(date: LocalDate): String {
         var message = "You have been drawn to bring the croissants on ${date}"
 
