@@ -83,7 +83,7 @@ class SlackBot : Bot() {
 
         val restTemplate = RestTemplate()
         try {
-            val requestJson = "{\"token\":\"$slackToken\",\"channel\":\"@${user.username}\",\"text\":\"$message\",\"username\":\"Croissants\"}"
+            val requestJson = "{\"token\":\"$slackToken\",\"channel\":\"@${user.id}\",\"text\":\"$message\",\"username\":\"Croissants\"}"
             val url = "https://slack.com/api/chat.postMessage"
             val headers = HttpHeaders()
             headers.contentType = MediaType.APPLICATION_JSON

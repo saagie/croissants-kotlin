@@ -112,7 +112,10 @@ class DrawService(val userService: UserService,
 
     }
     fun announcementMessage(date: LocalDate): String {
-        var message = "You have been drawn to bring the croissants on ${date}"
+        var message = "You have been drawn to bring the croissants on ${date} \n\n"+
+                "/c-accept For accept to bring the croissants"+
+                "/c-decline For decline to bring the croissants"
+
 
         return message
     }

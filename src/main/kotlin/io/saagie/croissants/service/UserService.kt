@@ -13,10 +13,11 @@ class UserService(
         val historyService: HistoryService
 
 ) {
-    fun findOneById(userId: String):User{
+    fun findOneById(userId: String): User {
         return userDao.findOneById(userId)
     }
-    fun registerUser(username: String, id: String): Boolean {
+
+    fun registerUser(username: String, id: String, email: String): Boolean {
         if (!userDao.exists(id)) {
             val allHistory = historyService.getAll()
             val weight = if (allHistory.isNotEmpty()) {
@@ -24,7 +25,7 @@ class UserService(
             } else {
                 0
             }
-            userDao.save(User(id = id, username = username, initialWeight = weight))
+            userDao.save(User(id = id, email = email, username = username, initialWeight = weight))
             return true
         }
         return false
@@ -36,7 +37,7 @@ class UserService(
         val email = userMap.get("email") as String
 
         if ( userDao.findOneByEmail(email) == null) {
-            registerUser(userMap.get("name") as String, idUser)
+            registerUser(userMap.get("login") as String, idUser,email)
         }
         if (userDao.exists(email)) {
             val user = userDao.findOneByEmail(email)
@@ -98,7 +99,7 @@ class UserService(
 
     fun getWeightedCoefficient(user: User): Int {
         val countSelection = historyService.getAllByEmailUser(user.email!!).size
-        return Math.floor(user.coefficient / ((countSelection+1)*0.5)).toInt()
+        return Math.floor(user.coefficient / ((countSelection + 1) * 0.5)).toInt()
     }
 
     fun delete(userId: String) = userDao.delete(userId)
@@ -109,7 +110,7 @@ class UserService(
         var listUsers = userDao.findByEnable(true)
 
         history.distinctBy { it.emailUser }
-        return listUsers.filter { c -> ! (history.any { it.emailUser == c.email }) }
+        return listUsers.filter { c -> !(history.any { it.emailUser == c.email }) }
 
     }
 }

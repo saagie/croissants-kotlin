@@ -46,7 +46,7 @@ class SlackSlashCommand(
                              @RequestParam("command") command: String,
                              @RequestParam("text") text: String,
                              @RequestParam("response_url") responseUrl: String): RichMessage {
-        val richMessage = RichMessage("---Aston Parking : Available commands--- ")
+        val richMessage = RichMessage("---Croissants : Available commands--- ")
         val attachments = arrayOf(
                 Attachment().apply {
                     setText("/c-command : this list of all available commands")
@@ -161,10 +161,19 @@ class SlackSlashCommand(
 
         try {
             val user = userService.get(userId)
+
             val weightedCoefficient = userService.getWeightedCoefficient(user)
             val draw = historyService.getAllByEmailUser(user.email!!).size
             val totalCoef = userService.getAllActive().sumBy { userService.getWeightedCoefficient(it) }
-            val chance: Double = ((weightedCoefficient / totalCoef.toDouble()) * 100)
+            val chance :Double  = if (totalCoef>0)
+            {
+
+                ((weightedCoefficient / totalCoef.toDouble()) * 100)
+            }else
+            {
+                0.0
+
+            }
             val richMessage = RichMessage("Profile : ${user.username}")
 
             val attachments = arrayOf(
@@ -187,14 +196,14 @@ class SlackSlashCommand(
                         setText("Status :  ${user.status()}")
                     },
                     Attachment().apply {
-                        setText("Chance of being selected :  ${BigDecimal(chance).setScale(2, BigDecimal.ROUND_HALF_UP).toDouble()}%")
+                        setText("Chance of being selected :  ${ if (user.enable) { BigDecimal(chance).setScale(2, BigDecimal.ROUND_HALF_UP).toDouble() } else { "0"}}%")
                     }
             )
             richMessage.attachments = attachments
 
             return richMessage.encodedMessage()
         } catch (e: Exception) {
-            val richMessage = RichMessage("The profile : ${userName} doesn't exist. Type /ap-register to create your profile.")
+            val richMessage = RichMessage("The profile : ${userName} doesn't exist. Go to $url to create your account.")
             return richMessage.encodedMessage()
         }
 
