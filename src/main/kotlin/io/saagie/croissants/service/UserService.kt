@@ -37,12 +37,13 @@ class UserService(
         val email = userMap.get("email") as String
 
         if ( userDao.findOneByEmail(email) == null) {
-            registerUser(userMap.get("login") as String, idUser,email)
+            registerUser(userMap.get("name") as String, idUser,email)
         }
         if (userDao.exists(email)) {
             val user = userDao.findOneByEmail(email)
             user.apply {
                 id = userMap.get("id") as String
+                username = userMap.get("name") as String
                 image_24 = userMap.get("image_24") as String
                 image_32 = userMap.get("image_32") as String
                 image_48 = userMap.get("image_48") as String
