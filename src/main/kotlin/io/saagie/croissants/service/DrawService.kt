@@ -25,13 +25,17 @@ class DrawService(val userService: UserService,
     @Scheduled(cron = "0 0 8 * * WED")
     fun scheduleSelection() {
         val nextFriday = utilService.getNextFriday()
-        val doDraw = historyService.getByDate(utilService.localDateToDate(nextFriday)).filter { it.ok != 2 }.isEmpty()
+        val doDraw = historyService.getByDate(utilService.localDateToDate(nextFriday)).filter { it.ok != 2 }
 
-        if (doDraw){
+        if (doDraw.isEmpty()){
             val userDraw = this.drawUser()
             historyService.save(History(emailUser = userDraw.email, dateCroissant = utilService.localDateToDate(nextFriday),dateDraw = Date.from(Instant.now())))
             slackBot.sendDM(userDraw,announcementMessage(nextFriday))
             slackBot.sendDM(userService.getByEmail(opsEmail),announcementMessage(nextFriday,userDraw))
+        }else
+        {
+            val userDraw= userService.getByEmail(doDraw.first().emailUser!!)
+            slackBot.selection(userDraw, utilService.getNextFriday())
         }
     }
 

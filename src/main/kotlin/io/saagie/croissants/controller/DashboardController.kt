@@ -19,11 +19,6 @@ class DashboardController(val userService: UserService,val historyService: Histo
         )
     }
 
-    @GetMapping("/draw")
-    fun draw() {
-        drawService.scheduleSelection()
-
-    }
     data class Dashboard(
             val users: List<User>,
             val historys: List<History>
