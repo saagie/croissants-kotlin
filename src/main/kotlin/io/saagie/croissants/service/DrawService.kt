@@ -54,7 +54,7 @@ class DrawService(val userService: UserService,
          userService.getAll().map { userService.save(it.incrementCoefficient(5)) }
     }
 
-    @Scheduled(cron = "0 */30 * * * *")
+    @Scheduled(cron = "0 */30 7-22 * * *")
     fun autoDecline() {
         val history = historyService.getByDrawDate(Date.from(Instant.now()))
 
