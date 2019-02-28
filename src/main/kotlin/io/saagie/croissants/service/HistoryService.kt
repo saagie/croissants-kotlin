@@ -30,6 +30,10 @@ class HistoryService(
         return historyDao.findAllByEmailUser(userEmail)
     }
 
+    fun getLastYearByEmailUser(userEmail: String): List<History> {
+        return historyDao.findAllByEmailUser(userEmail).filter {
+            (it.dateCroissant > Date.from(Instant.now().minus(1, ChronoUnit.YEARS)) && it.dateCroissant < Date.from(Instant.now()) && it.ok == 1 )  }
+    }
 
     fun getLastSelected(): History? {
         return historyDao.findAll().filter { it.dateCroissant > Date.from(Instant.now()) && it.dateCroissant <= utilService.localDateToDate(utilService.getNextFriday()) && it.ok == 1 }.firstOrNull()
