@@ -163,7 +163,7 @@ class SlackSlashCommand(
             val user = userService.get(userId)
 
             val weightedCoefficient = userService.getWeightedCoefficient(user)
-            val draw = historyService.getAllByEmailUser(user.email!!).size
+            val draw = historyService.getLastYearByEmailUser(user.email!!).size
             val totalCoef = userService.getAllActive().sumBy { userService.getWeightedCoefficient(it) }
             val chance :Double  = if (totalCoef>0)
             {
@@ -480,26 +480,52 @@ class SlackSlashCommand(
                             @RequestParam("response_url") responseUrl: String): Message {
 
 
-        var users = userService.getAll().sortedByDescending { userService.getWeightedCoefficient(it) }
+        var users = userService.getAll().filter{it.enable}.sortedByDescending { userService.getWeightedCoefficient(it) }
 
         val message = Message("*******************\n")
         message.text += "*Top*\n\n"
+        message.text += "Nom Coefficient Probabilité Selection\n"
         val lsize = users.size
         var i = lsize
         val allCoefficient = users.sumBy { userService.getWeightedCoefficient(it) }
-        users.map({
-            message.text += "${lsize + 1 - i--}. ${it.username} : ${userService.getWeightedCoefficient(it)}  ${BigDecimal(((userService.getWeightedCoefficient(it)  / allCoefficient.toDouble()) * 100)).setScale(2, BigDecimal.ROUND_HALF_UP).toDouble()   }%   ${if (!it.enable) {
-                "_inactive_"
-            } else {
-                ""
-            }}\n"
-        })
+        users.map{
+            message.text += "${lsize + 1 - i--}. ${it.username} : ${userService.getWeightedCoefficient(it)}  ${BigDecimal(((userService.getWeightedCoefficient(it)  / allCoefficient.toDouble()) * 100)).setScale(2, BigDecimal.ROUND_HALF_UP).toDouble()   }%  ${historyService.getLastYearByEmailUser(it.email!!).size} \n"
+        }
         message.text += "*******************\n"
 
 
         return message
     }
 
+    @RequestMapping(value = ["/slack/inactive"],
+            method = [(RequestMethod.POST)],
+            consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
+    fun onReceiveInactiveCommand(@RequestParam("token") token: String,
+                            @RequestParam("team_id") teamId: String,
+                            @RequestParam("team_domain") teamDomain: String,
+                            @RequestParam("channel_id") channelId: String,
+                            @RequestParam("channel_name") channelName: String,
+                            @RequestParam("user_id") userId: String,
+                            @RequestParam("user_name") userName: String,
+                            @RequestParam("command") command: String,
+                            @RequestParam("text") text: String,
+                            @RequestParam("response_url") responseUrl: String): Message {
+
+
+        var users = userService.getAll().filter{! it.enable}
+
+        val message = Message("*******************\n")
+        message.text += "*Inactive*\n\n"
+        val lsize = users.size
+        var i = lsize
+        users.map{
+            message.text += "${lsize + 1 - i--}. ${it.username}   \n"
+        }
+        message.text += "*******************\n"
+
+
+        return message
+    }
     @RequestMapping(value = ["/slack/random"],
             method = [(RequestMethod.POST)],
             consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])

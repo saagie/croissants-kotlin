@@ -32,7 +32,7 @@ class HistoryService(
 
     fun getLastYearByEmailUser(userEmail: String): List<History> {
         return historyDao.findAllByEmailUser(userEmail).filter {
-            (it.dateCroissant > Date.from(Instant.now().minus(1, ChronoUnit.YEARS)) && it.dateCroissant < Date.from(Instant.now()) && it.ok == 1 )  }
+            (it.dateCroissant > Date.from(Instant.now().minus(365, ChronoUnit.DAYS)) && it.dateCroissant < Date.from(Instant.now()) && it.ok == 1 )  }
     }
 
     fun getLastSelected(): History? {
