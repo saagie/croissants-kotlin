@@ -37,12 +37,12 @@ Voici la liste de toutes les commandes possibles :
     /c-trap : to trap a unlock workstation
     /c-top : to see all coefficient
     /c-top-ten : to see top ten highest coefficient
-    /c-propose-next : to purpose the croissant for next friday
+    /c-propose-next : to propose the croissant for next friday
     /c-inactive-profile : to disable your Croissants profile during holiday
     /c-active-profile : to enable your Croissants profile after holiday
     /c-accept : to accept selection
     /c-decline : to decline selection (+10 coefficient)
-    /c-propose dd/MM : to purpose the croissant for the specified date (day/month)
+    /c-propose dd/MM : to propose the croissant for the specified date (day/month)
 
 
 ## Le projet

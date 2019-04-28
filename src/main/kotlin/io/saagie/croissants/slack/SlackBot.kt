@@ -69,8 +69,8 @@ class SlackBot : Bot() {
         }
     }
 
-    fun purpose(user: User,date: LocalDate) {
-        val message = Message("Croissant has been purpose the ${date.format(DateTimeFormatter.ofPattern("dd/MM"))} by ${ user.username } \n Thanks.\n")
+    fun propose(user: User,date: LocalDate) {
+        val message = Message("Croissant has been propose the ${date.format(DateTimeFormatter.ofPattern("dd/MM"))} by ${ user.username } \n Thanks.\n")
         val restTemplate = RestTemplate()
         try {
             restTemplate.postForEntity<String>(slackWebhookUrl, message, String::class.java)
