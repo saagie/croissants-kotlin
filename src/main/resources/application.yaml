@@ -13,17 +13,17 @@ slackBotToken: ${CROISSANTS_SLACKBOT_TOKEN}
 slackWebhookUrl: ${CROISSANTS_SLACK_WEBHOOK_URL}
 rtmUrl: "https://slack.com/api/rtm.start?token={token}&simple_latest&no_unreads"
 # MAIL
-sendEmail: true
-mailFrom: ${CROISSANTS_MAIL_FROM}
+sendEmail: false
+mailFrom: ${CROISSANTS_MAIL_FROM:no@reply.com}
 security:
   basic:
     enabled: false
 spring:
   mail:
-    host: ${CROISSANTS_MAIL_HOST}
-    port: ${CROISSANTS_MAIL_PORT}
-    username: ${CROISSANTS_MAIL_USERNAME}
-    password: ${CROISSANTS_MAIL_PASSWORD}
+    host: ${CROISSANTS_MAIL_HOST:localhost}
+    port: ${CROISSANTS_MAIL_PORT:25}
+    username: ${CROISSANTS_MAIL_USERNAME:admin}
+    password: ${CROISSANTS_MAIL_PASSWORD:password}
     protocol: smtp
     properties:
           mail:

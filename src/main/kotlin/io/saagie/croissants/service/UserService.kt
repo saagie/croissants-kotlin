@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service
 @Service
 class UserService(
         val userDao: UserDao,
-        val emailService: EmailService,
         val historyService: HistoryService
 
 ) {
@@ -80,14 +79,12 @@ class UserService(
         val user = get(id)
         user.enable = !user.enable
         userDao.save(user)
-        emailService.profileStatusChange(user)
     }
 
     fun changeStatus(id: String, status: Boolean) {
         val user = get(id)
         user.enable = status
         userDao.save(user)
-        emailService.profileStatusChange(user)
     }
 
     fun save(user: User) {

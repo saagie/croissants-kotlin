@@ -482,16 +482,31 @@ class SlackSlashCommand(
 
         var users = userService.getAll().filter{it.enable}.sortedByDescending { userService.getWeightedCoefficient(it) }
 
-        val message = Message("*******************\n")
-        message.text += "*Top*\n\n"
-        message.text += "Nom Coefficient Probabilité Selection\n"
+        val message = Message("*******************\n```")
+        message.text += "┌────┬────────────────────────────────────────┬─────┬────────┬─────┐\n"
+        message.text += "│" +
+                " N°".padEnd(4,' ') + "│" +
+                " Nom".padEnd(40,' ')  + "│" +
+                "Coef".padStart(5,' ')  + "│" +
+                "Chance ".padStart(8,' ')  + "│" +
+                "Sel.".padStart(5,' ')  + "│" +
+                "\n"
+
+        message.text += "├────┼────────────────────────────────────────┼─────┼────────┼─────┤\n"
         val lsize = users.size
         var i = lsize
         val allCoefficient = users.sumBy { userService.getWeightedCoefficient(it) }
         users.map{
-            message.text += "${lsize + 1 - i--}. ${it.username} : ${userService.getWeightedCoefficient(it)}  ${BigDecimal(((userService.getWeightedCoefficient(it)  / allCoefficient.toDouble()) * 100)).setScale(2, BigDecimal.ROUND_HALF_UP).toDouble()   }%  ${historyService.getLastYearByEmailUser(it.email!!).size} \n"
+            message.text += "|" +
+                    " ${lsize + 1 - i--}".padEnd(4,' ') + "|" +
+                    " ${it.username}".padEnd(40,' ') + "|" +
+                    "${userService.getWeightedCoefficient(it)} ".padStart(5,' ') + "|" +
+                    "${BigDecimal(((userService.getWeightedCoefficient(it)  / allCoefficient.toDouble()) * 100)).setScale(2, BigDecimal.ROUND_HALF_UP).toDouble()   }% ".padStart(8,' ') + "|" +
+                    "${historyService.getLastYearByEmailUser(it.email!!).size} ".padStart(5,' ') + "|" +
+                    "\n"
         }
-        message.text += "*******************\n"
+        message.text += "└────┴────────────────────────────────────────┴─────┴────────┴─────┘\n"
+        message.text += "```*******************\n"
 
 
         return message
