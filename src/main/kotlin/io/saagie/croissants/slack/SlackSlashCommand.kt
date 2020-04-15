@@ -82,13 +82,13 @@ class SlackSlashCommand(
                     setText("/c-decline : to decline selection (+10 coefficient)")
                 },
                 Attachment().apply {
-                    setText("/c-propose dd/MM : to purpose the croissant  for the specified date (day/month)")
+                    setText("/c-propose dd/MM : to propose the croissant  for the specified date (day/month)")
                 },
                 Attachment().apply {
-                    setText("/c-propose-next : to purpose the croissant for next friday")
+                    setText("/c-propose-next : to propose the croissant for next friday")
                 },
                 Attachment().apply {
-                    setText("/c-remove-propose : to remove purpose the croissant")
+                    setText("/c-remove-propose : to remove propose the croissant")
                 }
         )
         richMessage.attachments = attachments
@@ -322,10 +322,10 @@ class SlackSlashCommand(
         return message
     }
 
-    @RequestMapping(value = ["/slack/purpose"],
+    @RequestMapping(value = ["/slack/propose"],
             method = [(RequestMethod.POST)],
             consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
-    fun onReceivePurposeCommand(@RequestParam("token") token: String,
+    fun onReceiveProposeCommand(@RequestParam("token") token: String,
                                 @RequestParam("team_id") teamId: String,
                                 @RequestParam("team_domain") teamDomain: String,
                                 @RequestParam("channel_id") channelId: String,
@@ -338,16 +338,16 @@ class SlackSlashCommand(
 
 
         try {
-            val result = historyService.purpose(userId, utilService.extractDate(text))
+            val result = historyService.propose(userId, utilService.extractDate(text))
             return if (result) {
-                Message("You have purpose the croissant for the day (${text}) .")
+                Message("You have propose the croissant for the day (${text}) .")
             } else {
                 val history = historyService.getByDate(utilService.localDateToDate(utilService.extractDate(text))).filter { it.ok != 2 }.firstOrNull()
                 if (history != null) {
                     val user = userService.getByEmail(history!!.emailUser!!)
-                    Message("${user.username} already purpose the croissant for the day (${text}) .")
+                    Message("${user.username} already propose the croissant for the day (${text}) .")
                 } else {
-                    Message("Somebody already purpose the croissant for the day (${text}) .")
+                    Message("Somebody already propose the croissant for the day (${text}) .")
                 }
             }
         } catch (iae: IllegalArgumentException) {
@@ -355,10 +355,10 @@ class SlackSlashCommand(
         }
     }
 
-    @RequestMapping(value = ["/slack/purpose-next"],
+    @RequestMapping(value = ["/slack/propose-next"],
             method = [(RequestMethod.POST)],
             consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
-    fun onReceivePurposeNextCommand(@RequestParam("token") token: String,
+    fun onReceiveProposeNextCommand(@RequestParam("token") token: String,
                                     @RequestParam("team_id") teamId: String,
                                     @RequestParam("team_domain") teamDomain: String,
                                     @RequestParam("channel_id") channelId: String,
@@ -371,16 +371,16 @@ class SlackSlashCommand(
 
         try {
             val date = utilService.getNextFriday()
-            val result = historyService.purpose(userId, date)
+            val result = historyService.propose(userId, date)
             return if (result) {
-                Message("You have purpose the croissant for the day (${date.format(DateTimeFormatter.ofPattern("dd/MM/YY"))}) .")
+                Message("You have propose the croissant for the day (${date.format(DateTimeFormatter.ofPattern("dd/MM/YY"))}) .")
             } else {
                 val history = historyService.getByDate(utilService.localDateToDate(date)).filter { it.ok != 2 }.firstOrNull()
                 if (history != null) {
                     val user = userService.getByEmail(history!!.emailUser!!)
-                    Message("${user.username} already purpose the croissant for the day (${date.format(DateTimeFormatter.ofPattern("dd/MM/YY"))})  .")
+                    Message("${user.username} already propose the croissant for the day (${date.format(DateTimeFormatter.ofPattern("dd/MM/YY"))})  .")
                 } else {
-                    Message("Somebody already purpose the croissant for the day (${date.format(DateTimeFormatter.ofPattern("dd/MM/YY"))})  .")
+                    Message("Somebody already propose the croissant for the day (${date.format(DateTimeFormatter.ofPattern("dd/MM/YY"))})  .")
                 }
             }
         } catch (iae: IllegalArgumentException) {
@@ -389,10 +389,10 @@ class SlackSlashCommand(
 
     }
 
-    @RequestMapping(value = ["/slack/remove-purpose"],
+    @RequestMapping(value = ["/slack/remove-propose"],
             method = [(RequestMethod.POST)],
             consumes = [(MediaType.APPLICATION_FORM_URLENCODED_VALUE)])
-    fun onReceiveRemovePurposeCommand(@RequestParam("token") token: String,
+    fun onReceiveRemoveProposeCommand(@RequestParam("token") token: String,
                                 @RequestParam("team_id") teamId: String,
                                 @RequestParam("team_domain") teamDomain: String,
                                 @RequestParam("channel_id") channelId: String,
@@ -414,11 +414,11 @@ class SlackSlashCommand(
             val history = historyService.getByDate(utilService.localDateToDate(date)).filter { it.ok != 2 }.firstOrNull()
              if (history != null) {
                 historyService.delete(history)
-                Message("Your purpose has been removed (${text}).")
+                Message("Your propose has been removed (${text}).")
 
 
             } else {
-                Message("You don't have purpose this day (${text}).")
+                Message("You don't have propose this day (${text}).")
 
             }
         }

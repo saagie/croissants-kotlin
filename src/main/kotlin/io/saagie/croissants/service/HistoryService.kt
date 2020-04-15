@@ -63,7 +63,7 @@ class HistoryService(
     }
 
 
-    fun purpose(userId: String, localdate: LocalDate): Boolean {
+    fun propose(userId: String, localdate: LocalDate): Boolean {
         val user = userDao.findOneById(userId)
         if (historyDao.findByDateCroissant(utilService.localDateToDate(localdate)).filter { it.ok !=2 }.isEmpty()){
             save(History(dateCroissant = utilService.localDateToDate(localdate), emailUser = user.email, ok = 1))
